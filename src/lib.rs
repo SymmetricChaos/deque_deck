@@ -1,7 +1,7 @@
 use std::{collections::VecDeque, ops::Index};
 
-use rand::Rng;
 use rand::seq::SliceRandom;
+use rand::Rng;
 use rand_distr::{Binomial, Distribution};
 
 /// The suit of a card.
@@ -15,11 +15,18 @@ pub enum Suit {
 }
 
 impl Suit {
-
-    pub const CLUBS: [char; 14] =   ['🃑', '🃒', '🃓', '🃔', '🃕', '🃖', '🃗', '🃘', '🃙', '🃚', '🃛', '🃜', '🃝', '🃞'];
-    pub const HEARTS: [char; 14] =   ['🂱', '🂲', '🂳', '🂴', '🂵', '🂶', '🂷', '🂸', '🂹', '🂺', '🂻', '🂼', '🂽', '🂾'];
-    pub const DIAMONDS: [char; 14] = ['🃁', '🃂', '🃃', '🃄', '🃅', '🃆', '🃇', '🃈', '🃉', '🃊', '🃋', '🃌', '🃍', '🃎'];
-    pub const SPADES: [char; 14] =    ['🂡', '🂢', '🂣', '🂤', '🂥', '🂦', '🂧', '🂨', '🂩', '🂪', '🂫', '🂬', '🂭', '🂮'];
+    pub const CLUBS: [char; 14] = [
+        '🃑', '🃒', '🃓', '🃔', '🃕', '🃖', '🃗', '🃘', '🃙', '🃚', '🃛', '🃜', '🃝', '🃞',
+    ];
+    pub const HEARTS: [char; 14] = [
+        '🂱', '🂲', '🂳', '🂴', '🂵', '🂶', '🂷', '🂸', '🂹', '🂺', '🂻', '🂼', '🂽', '🂾',
+    ];
+    pub const DIAMONDS: [char; 14] = [
+        '🃁', '🃂', '🃃', '🃄', '🃅', '🃆', '🃇', '🃈', '🃉', '🃊', '🃋', '🃌', '🃍', '🃎',
+    ];
+    pub const SPADES: [char; 14] = [
+        '🂡', '🂢', '🂣', '🂤', '🂥', '🂦', '🂧', '🂨', '🂩', '🂪', '🂫', '🂬', '🂭', '🂮',
+    ];
 
     pub fn symbol(&self) -> char {
         match self {
@@ -37,7 +44,6 @@ impl Suit {
             Suit::Diamonds => &Suit::DIAMONDS,
             Suit::Spades => &Suit::SPADES,
         }
-        
     }
 }
 
@@ -50,7 +56,7 @@ impl TryFrom<char> for Suit {
             'H' => Suit::Hearts,
             'D' => Suit::Diamonds,
             'S' => Suit::Spades,
-            _ => return Err("invalid char for suit")
+            _ => return Err("invalid char for suit"),
         })
     }
 }
@@ -115,20 +121,18 @@ impl TryFrom<char> for Rank {
             'J' => Rank::Jack,
             'Q' => Rank::Queen,
             'K' => Rank::King,
-            _ => return Err("invalid char for rank")
+            _ => return Err("invalid char for rank"),
         })
     }
 }
 
-
 #[derive(Debug, Copy, Clone)]
-pub struct PlayingCard{
+pub struct PlayingCard {
     rank: Rank,
     suit: Suit,
 }
 
 impl PlayingCard {
-
     /// The full English name of the card.
     fn name(&self) -> &'static str {
         match self.rank {
@@ -220,7 +224,7 @@ impl PlayingCard {
     }
 
     /// Return the character pair that represents the rank and suit.
-    fn pair(&self) -> (char,char) {
+    fn pair(&self) -> (char, char) {
         (self.rank.symbol(), self.suit.symbol())
     }
 
@@ -230,20 +234,18 @@ impl PlayingCard {
     }
 }
 
-impl TryFrom<(char,char)> for PlayingCard {
+impl TryFrom<(char, char)> for PlayingCard {
     type Error = &'static str;
 
-    fn try_from(value: (char,char)) -> Result<Self, Self::Error> {
+    fn try_from(value: (char, char)) -> Result<Self, Self::Error> {
         let rank = Rank::try_from(value.0)?;
         let suit = Suit::try_from(value.1)?;
-        Ok(PlayingCard{rank,suit})
+        Ok(PlayingCard { rank, suit })
     }
 }
 
-
-
 pub struct Deck<T> {
-    cards: VecDeque<T>
+    cards: VecDeque<T>,
 }
 
 impl<PlayingCard> Deck<PlayingCard> {
@@ -254,7 +256,6 @@ impl<PlayingCard> Deck<PlayingCard> {
 }
 
 impl<T> Deck<T> {
-
     fn binom(&self) -> usize {
         let bin = Binomial::new(self.cards.len().try_into().unwrap(), 0.5).unwrap();
         usize::try_from(bin.sample(&mut rand::thread_rng())).unwrap()
@@ -263,8 +264,6 @@ impl<T> Deck<T> {
     fn uniform(&self) -> usize {
         rand::thread_rng().gen_range(0..self.cards.len())
     }
-
-
 
     /// Get a reference to the nth card.
     pub fn get(&self, n: usize) -> Option<&T> {
@@ -275,8 +274,6 @@ impl<T> Deck<T> {
     pub fn get_mut(&mut self, n: usize) -> Option<&mut T> {
         self.cards.get_mut(n)
     }
-
-
 
     /// Draw the top card of the deck.
     pub fn draw_top(&mut self) -> Option<T> {
@@ -303,8 +300,6 @@ impl<T> Deck<T> {
         self.draw_nth(self.binom())
     }
 
-
-
     /// Place the card on top of the deck.
     pub fn place_top(&mut self, card: T) {
         self.cards.push_front(card)
@@ -314,7 +309,7 @@ impl<T> Deck<T> {
     pub fn place_bottom(&mut self, card: T) {
         self.cards.push_back(card)
     }
-    
+
     /// Place the card in the nth position in the deck. 0 places it on the top.
     pub fn place_nth(&mut self, n: usize, card: T) {
         self.cards.insert(n, card);
@@ -329,8 +324,6 @@ impl<T> Deck<T> {
     pub fn place_binom(&mut self, card: T) {
         self.place_nth(self.binom(), card)
     }
-
-
 
     /// Cut the deck at nth position.
     pub fn cut_nth(&mut self, n: usize) {
@@ -347,12 +340,11 @@ impl<T> Deck<T> {
         self.cards.rotate_left(self.binom())
     }
 
-
-
-
     /// Split the deck at the nth position. Retains the top of the split and returns the bottom.
     pub fn split_nth(&mut self, n: usize) -> Deck<T> {
-        Deck{ cards: self.cards.split_off(n) }
+        Deck {
+            cards: self.cards.split_off(n),
+        }
     }
 
     /// Split the deck at a random position. Retains the top of the split and returns the bottom.
@@ -365,8 +357,6 @@ impl<T> Deck<T> {
         self.split_nth(self.binom())
     }
 
-
-
     /// Perform a Fisher-Yates shuffle on the deck. This is a mathematically correct shuffle that gives every card an equal chance of ending up at any postion. For a simulated human shuffle see riffle.
     pub fn shuffle(&mut self) {
         let mut rng = rand::thread_rng();
@@ -377,25 +367,30 @@ impl<T> Deck<T> {
     pub fn riffle(&mut self) {
         let n = self.split_binom();
         todo!()
-
     }
 }
 
-impl<T, const N: usize> From<[T;N]> for Deck<T> {
-    fn from(arr: [T;N]) -> Self {
-        Deck { cards: VecDeque::from(arr) }
+impl<T, const N: usize> From<[T; N]> for Deck<T> {
+    fn from(arr: [T; N]) -> Self {
+        Deck {
+            cards: VecDeque::from(arr),
+        }
     }
 }
 
 impl<T> From<Vec<T>> for Deck<T> {
     fn from(vec: Vec<T>) -> Self {
-        Deck { cards: VecDeque::from(vec) }
+        Deck {
+            cards: VecDeque::from(vec),
+        }
     }
 }
 
 impl<T> From<VecDeque<T>> for Deck<T> {
     fn from(vec: VecDeque<T>) -> Self {
-        Deck { cards: VecDeque::from(vec) }
+        Deck {
+            cards: VecDeque::from(vec),
+        }
     }
 }
 
@@ -409,48 +404,46 @@ impl<T> FromIterator<T> for Deck<T> {
     }
 }
 
-
-
-
-
 #[cfg(test)]
 mod tests {
     use super::*;
 
     #[test]
     fn draw_top() {
-        let mut deck = Deck::from([1,2,3,4,5,6]);
-        assert_eq!(deck.draw_top().unwrap(),1)
+        let mut deck = Deck::from([1, 2, 3, 4, 5, 6]);
+        assert_eq!(deck.draw_top().unwrap(), 1)
     }
 
     #[test]
     fn draw_bottom() {
-        let mut deck = Deck::from([1,2,3,4,5,6]);
-        assert_eq!(deck.draw_bottom().unwrap(),6)
+        let mut deck = Deck::from([1, 2, 3, 4, 5, 6]);
+        assert_eq!(deck.draw_bottom().unwrap(), 6)
     }
 
     #[test]
     fn draw_nth() {
-        let mut deck = Deck::from([1,2,3,4,5,6]);
-        assert_eq!(deck.draw_nth(3).unwrap(),4)
+        let mut deck = Deck::from([1, 2, 3, 4, 5, 6]);
+        assert_eq!(deck.draw_nth(3).unwrap(), 4)
     }
-
 
     #[test]
     fn place_top() {
-        let mut deck = Deck::from([1,2,3,4,5,6]);
-        deck.place_top(100)
+        let mut deck = Deck::from([1, 2, 3, 4, 5, 6]);
+        deck.place_top(100);
+        assert_eq!(deck.get(0).unwrap(), &100);
     }
 
     #[test]
     fn place_bottom() {
-        let mut deck = Deck::from([1,2,3,4,5,6]);
-        deck.place_bottom(100)
+        let mut deck = Deck::from([1, 2, 3, 4, 5, 6]);
+        deck.place_bottom(100);
+        assert_eq!(deck.get(6).unwrap(), &100);
     }
 
     #[test]
     fn place_nth() {
-        let mut deck = Deck::from([1,2,3,4,5,6]);
-        deck.place_nth(3,100)
+        let mut deck = Deck::from([1, 2, 3, 4, 5, 6]);
+        deck.place_nth(3, 100);
+        assert_eq!(deck.get(3).unwrap(), &100);
     }
 }
