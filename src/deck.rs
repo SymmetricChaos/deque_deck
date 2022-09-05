@@ -9,16 +9,16 @@ pub struct Deck<T> {
 }
 
 impl<PlayingCard> Deck<PlayingCard> {
-    /// Creates a deck of PlayingCard in canonical order.
+    /// Create a deck of PlayingCard in canonical order.
     pub fn new() -> Deck<PlayingCard> {
-        todo!("Creates a deck of PlayingCard in canonical order.")
+        todo!("Create a deck of PlayingCard in canonical order.")
     }
 }
 
 impl<T> Deck<T> {
     fn bern(p: f64) -> bool {
-        let bin = Bernoulli::new(p).unwrap();
-        bin.sample(&mut rand::thread_rng())
+        let bern = Bernoulli::new(p).unwrap();
+        bern.sample(&mut rand::thread_rng())
     }
 
     fn binom(&self) -> usize {
@@ -31,15 +31,11 @@ impl<T> Deck<T> {
     }
 
     pub fn empty() -> Deck<T> {
-        Deck {
-            cards: VecDeque::new(),
-        }
+        Deck::from(VecDeque::new())
     }
 
     pub fn with_capacity(n: usize) -> Deck<T> {
-        Deck {
-            cards: VecDeque::with_capacity(n),
-        }
+        Deck::from(VecDeque::with_capacity(n))
     }
 
     pub fn len(&self) -> usize {
@@ -127,9 +123,7 @@ impl<T> Deck<T> {
 
     /// Split the deck at the nth position, retaining the top part.
     pub fn split_off_nth(&mut self, n: usize) -> Deck<T> {
-        Deck {
-            cards: self.cards.split_off(n),
-        }
+        Deck::from(self.cards.split_off(n))
     }
 
     /// Split the deck at a random position, retaining the top part.
@@ -170,7 +164,7 @@ impl<T> Deck<T> {
 impl<T: Clone> Deck<T> {
     /// Perform a single Gilbert-Shannon-Reeds riffle of the deck. This is a slow and statistically poor quality shuffle that simulates a single riffle shuffle. For good mixing several riffles are needed.
     pub fn riffle(&mut self) {
-        let n = self.cards.clone().len();
+        let n = self.cards.len();
         let mut new: Deck<T> = Deck::with_capacity(n);
         let cards = Deck::from(self.cards.clone());
         let (mut left, mut right) = cards.split_binom();
@@ -197,6 +191,30 @@ impl<T: Clone> Deck<T> {
             }
         }
         *self = new;
+    }
+
+    /// Perform a perfect faro shuffle if the deck contains an even number of cards.
+    pub fn faro(&mut self, out: bool) -> Result<(), &'static str> {
+        let n = self.cards.len();
+        if n % 2 == 0 {
+            return Err("a faro shuffle requires an even number of cards");
+        } else {
+            let mut new: Deck<T> = Deck::with_capacity(n);
+            let cards = Deck::from(self.cards.clone());
+            let (mut left, mut right) = cards.split_binom();
+            if out {
+                for _ in 0..(n / 2) {
+                    new.place_top(left.draw_top().unwrap());
+                    new.place_top(right.draw_top().unwrap());
+                }
+            } else {
+                for _ in 0..(n / 2) {
+                    new.place_top(right.draw_top().unwrap());
+                    new.place_top(left.draw_top().unwrap());
+                }
+            }
+        }
+        Ok(())
     }
 }
 
