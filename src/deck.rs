@@ -2,7 +2,7 @@ use std::collections::VecDeque;
 
 use rand::seq::SliceRandom;
 use rand::Rng;
-use rand_distr::{Binomial, Distribution};
+use rand_distr::{Bernoulli, Binomial, Distribution};
 
 pub struct Deck<T> {
     cards: VecDeque<T>,
@@ -16,6 +16,11 @@ impl<PlayingCard> Deck<PlayingCard> {
 }
 
 impl<T> Deck<T> {
+    fn bern(p: f64) -> bool {
+        let bin = Bernoulli::new(p).unwrap();
+        bin.sample(&mut rand::thread_rng())
+    }
+
     fn binom(&self) -> usize {
         let bin = Binomial::new(self.cards.len().try_into().unwrap(), 0.5).unwrap();
         usize::try_from(bin.sample(&mut rand::thread_rng())).unwrap()
@@ -23,6 +28,26 @@ impl<T> Deck<T> {
 
     fn uniform(&self) -> usize {
         rand::thread_rng().gen_range(0..self.cards.len())
+    }
+
+    pub fn empty() -> Deck<T> {
+        Deck {
+            cards: VecDeque::new(),
+        }
+    }
+
+    pub fn with_capacity(n: usize) -> Deck<T> {
+        Deck {
+            cards: VecDeque::with_capacity(n),
+        }
+    }
+
+    pub fn len(&self) -> usize {
+        self.cards.len()
+    }
+
+    pub fn extend(&mut self, other: Deck<T>) {
+        self.cards.extend(other.cards)
     }
 
     /// Get a reference to the nth card.
@@ -100,21 +125,39 @@ impl<T> Deck<T> {
         self.cards.rotate_left(self.binom())
     }
 
-    /// Split the deck at the nth position. Retains the top of the split and returns the bottom.
-    pub fn split_nth(&mut self, n: usize) -> Deck<T> {
+    /// Split the deck at the nth position, retaining the top part.
+    pub fn split_off_nth(&mut self, n: usize) -> Deck<T> {
         Deck {
             cards: self.cards.split_off(n),
         }
     }
 
-    /// Split the deck at a random position. Retains the top of the split and returns the bottom.
-    pub fn split_random(&mut self) -> Deck<T> {
-        self.split_nth(self.uniform())
+    /// Split the deck at a random position, retaining the top part.
+    pub fn split_off_random(&mut self) -> Deck<T> {
+        self.split_off_nth(self.uniform())
     }
 
-    /// Split the deck following a binomial distribution, simulating human selection. Retains the top of the split and returns the bottom.
-    pub fn split_binom(&mut self) -> Deck<T> {
-        self.split_nth(self.binom())
+    /// Split the deck following a binomial distribution, simulating human selection, retaining the top part.
+    pub fn split_off_binom(&mut self) -> Deck<T> {
+        self.split_off_nth(self.binom())
+    }
+
+    /// Split the deck at the nth position.
+    pub fn split_nth(mut self, n: usize) -> (Deck<T>, Deck<T>) {
+        let cards = self.cards.split_off(n);
+        (Deck::from(self.cards), Deck::from(cards))
+    }
+
+    /// Split the deck at a random position.
+    pub fn split_random(self) -> (Deck<T>, Deck<T>) {
+        let n = self.uniform();
+        self.split_nth(n)
+    }
+
+    /// Split the deck following a binomial distribution, simulating human selection.
+    pub fn split_binom(self) -> (Deck<T>, Deck<T>) {
+        let n = self.binom();
+        self.split_nth(n)
     }
 
     /// Perform a Fisher-Yates shuffle on the deck. This is a mathematically correct shuffle that gives every card an equal chance of ending up at any postion. For a simulated human shuffle see riffle.
@@ -122,11 +165,38 @@ impl<T> Deck<T> {
         let mut rng = rand::thread_rng();
         self.cards.make_contiguous().shuffle(&mut rng);
     }
+}
 
-    /// Perform a single Bayer-Diaconis riffle of the deck. This is a mathematically poor shuffle that simulates a single riffle shuffle. For good mixing several riffles are needed.
+impl<T: Clone> Deck<T> {
+    /// Perform a single Gilbert-Shannon-Reeds riffle of the deck. This is a slow and statistically poor quality shuffle that simulates a single riffle shuffle. For good mixing several riffles are needed.
     pub fn riffle(&mut self) {
-        let n = self.split_binom();
-        todo!()
+        let n = self.cards.clone().len();
+        let mut new: Deck<T> = Deck::with_capacity(n);
+        let cards = Deck::from(self.cards.clone());
+        let (mut left, mut right) = cards.split_binom();
+        for _ in 0..n {
+            // We're going to hope decks are restricted to billions of cards here
+            let l = left.len() as f64;
+            let r = right.len() as f64;
+            if Self::bern(l / (r + l)) {
+                match left.draw_top() {
+                    Some(card) => new.place_top(card),
+                    None => {
+                        new.extend(right);
+                        break;
+                    }
+                }
+            } else {
+                match right.draw_top() {
+                    Some(card) => new.place_top(card),
+                    None => {
+                        new.extend(left);
+                        break;
+                    }
+                }
+            }
+        }
+        *self = new;
     }
 }
 
@@ -163,6 +233,16 @@ impl<T> FromIterator<T> for Deck<T> {
         Deck { cards }
     }
 }
+
+// impl<T> IntoIterator<T> for Deck<T> {
+//     type Item;
+
+//     type IntoIter;
+
+//     fn into_iter(self) -> Self::IntoIter {
+//         todo!()
+//     }
+// }
 
 #[cfg(test)]
 mod test_deck {
