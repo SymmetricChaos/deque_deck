@@ -1,8 +1,10 @@
 use std::collections::VecDeque;
 
-use rand::{Rng, random};
+use rand::Rng;
+use rand::seq::SliceRandom;
+use rand_distr::{Binomial, Distribution};
 
-
+/// The suit of a card.
 #[repr(u8)]
 #[derive(Debug, Copy, Clone, PartialEq, Eq)]
 pub enum Suit {
@@ -14,10 +16,10 @@ pub enum Suit {
 
 impl Suit {
 
-    pub const CLUBS: [char; 14] =    ['🂡', '🂢', '🂣', '🂤', '🂥', '🂦', '🂧', '🂨', '🂩', '🂪', '🂫', '🂬', '🂭', '🂮'];
+    pub const CLUBS: [char; 14] =   ['🃑', '🃒', '🃓', '🃔', '🃕', '🃖', '🃗', '🃘', '🃙', '🃚', '🃛', '🃜', '🃝', '🃞'];
     pub const HEARTS: [char; 14] =   ['🂱', '🂲', '🂳', '🂴', '🂵', '🂶', '🂷', '🂸', '🂹', '🂺', '🂻', '🂼', '🂽', '🂾'];
     pub const DIAMONDS: [char; 14] = ['🃁', '🃂', '🃃', '🃄', '🃅', '🃆', '🃇', '🃈', '🃉', '🃊', '🃋', '🃌', '🃍', '🃎'];
-    pub const SPADES: [char; 14] =   ['🃑', '🃒', '🃓', '🃔', '🃕', '🃖', '🃗', '🃘', '🃙', '🃚', '🃛', '🃜', '🃝', '🃞'];
+    pub const SPADES: [char; 14] =    ['🂡', '🂢', '🂣', '🂤', '🂥', '🂦', '🂧', '🂨', '🂩', '🂪', '🂫', '🂬', '🂭', '🂮'];
 
     pub fn symbol(&self) -> char {
         match self {
@@ -53,6 +55,7 @@ impl TryFrom<char> for Suit {
     }
 }
 
+/// The rank of a card.
 #[repr(u8)]
 #[derive(Debug, Copy, Clone, PartialEq, PartialOrd, Eq, Ord)]
 pub enum Rank {
@@ -239,72 +242,112 @@ impl TryFrom<(char,char)> for PlayingCard {
 
 
 
-pub struct Deck {
-    cards: VecDeque<PlayingCard>
+pub struct Deck<T> {
+    cards: VecDeque<T>
 }
 
-impl Deck {
+impl<PlayingCard> Deck<PlayingCard> {
+    /// Creates a deck of PlayingCard in canonical order.
+    pub fn new() -> Deck<PlayingCard> {
+        todo!("Creates a deck of PlayingCard in canonical order.")
+    }
+}
 
-    pub fn new() -> Deck {
-        Deck { 
-            cards: VecDeque::from(
-                []
-            )
-        }
+impl<T> Deck<T> {
+
+    fn binom(&self) -> usize {
+        let bin = Binomial::new(self.cards.len().try_into().unwrap(), 0.5).unwrap();
+        usize::try_from(bin.sample(&mut rand::thread_rng())).unwrap()
+    }
+
+    fn uniform(&self) -> usize {
+        rand::thread_rng().gen_range(0..self.cards.len())
     }
 
     /// Draw the top card of the deck.
-    pub fn draw_top(&mut self) -> Option<PlayingCard> {
+    pub fn draw_top(&mut self) -> Option<T> {
         self.cards.pop_front()
     }
 
     /// Draw the bottom card of the deck.
-    pub fn draw_bottom(&mut self) -> Option<PlayingCard> {
+    pub fn draw_bottom(&mut self) -> Option<T> {
         self.cards.pop_back()
     }
 
     /// Draw the nth card of the top. 0 draws the top card.
-    pub fn draw_nth(&mut self, n: usize) -> Option<PlayingCard> {
+    pub fn draw_nth(&mut self, n: usize) -> Option<T> {
         self.cards.remove(n)
     }
 
+    /// Draw a uniformly random card from the deck.
+    pub fn draw_random(&mut self) -> Option<T> {
+        self.draw_nth(self.uniform())
+    }
 
-    /// Draw a random card from the deck.
-    pub fn draw_random(&mut self) -> Option<PlayingCard> {
-        let mut rng = rand::thread_rng();
-        let n = rng.gen_range(0..self.cards.len());
-        self.draw_nth(n)
+    /// Draw a card from the deck following a binomial distribution, simulating human selection.
+    pub fn draw_binom(&mut self) -> Option<T> {
+        self.draw_nth(self.binom())
     }
 
 
 
     /// Place the card on top of the deck.
-    pub fn place_top(&mut self, card: PlayingCard) {
+    pub fn place_top(&mut self, card: T) {
         self.cards.push_front(card)
     }
 
     /// Place the card on the bottom of the deck.
-    pub fn place_bottom(&mut self, card: PlayingCard) {
+    pub fn place_bottom(&mut self, card: T) {
         self.cards.push_back(card)
     }
     
     /// Place the card in the nth position in the deck. 0 places it on the top.
-    pub fn place_nth(&mut self, n: usize, card: PlayingCard) {
+    pub fn place_nth(&mut self, n: usize, card: T) {
         self.cards.insert(n, card);
     }
 
     /// Place the card at a random position in the deck.
-    pub fn place_random(&mut self, card: PlayingCard) {
-        let mut rng = rand::thread_rng();
-        let n = rng.gen_range(0..self.cards.len());
-        self.place_nth(n, card)
+    pub fn place_random(&mut self, card: T) {
+        self.place_nth(self.uniform(), card)
+    }
+
+    /// Place a card into the deck following a binomial distribution, simulating human selection.
+    pub fn place_binom(&mut self, card: T) {
+        self.place_nth(self.binom(), card)
     }
 
 
 
-    /// Shuffle the deck.
+    /// Cut the deck at nth position and stack it again.
+    pub fn cut_nth(&mut self, n: usize) {
+        self.cards.rotate_left(n)
+    }
+
+    /// Cut the deck at a random position and stack it again.
+    pub fn cut_random(&mut self) {
+        let mut rng = rand::thread_rng();
+        let n = rng.gen_range(0..self.cards.len());
+        self.cards.rotate_left(n)
+    }
+
+    /// Cut the deck following a binomial distribution, simulating human selection.
+    pub fn cut_binom(&mut self) {
+        self.cards.rotate_left(self.binom())
+    }
+
+
+
+    /// Perform a Fisher-Yates shuffle on the deck. This is a mathematically correct shuffle that gives every card an equal chance of ending up at any postion. For a simulated human shuffle see riffle.
     pub fn shuffle(&mut self) {
-        self.shuffle()
+        let mut rng = rand::thread_rng();
+        self.cards.make_contiguous().shuffle(&mut rng);
+    }
+
+    /// Perform a single Bayer-Diaconis riffle of the deck. This is a mathematically poor shuffle that simulates a single riffle shuffle. For good mixing several riffles are needed.
+    pub fn riffle(&mut self) {
+        let bin = Binomial::new(self.cards.len().try_into().unwrap(), 0.5).unwrap();
+        let n = bin.sample(&mut rand::thread_rng());
+
     }
 }
 
