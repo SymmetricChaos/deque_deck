@@ -37,6 +37,25 @@ impl Rank {
             Rank::King => 'K',
         }
     }
+
+    pub fn name(&self) -> &'static str {
+        match self {
+            Rank::Ace => "Ace",
+            Rank::One => "One",
+            Rank::Two => "Two",
+            Rank::Three => "Three",
+            Rank::Four => "Four",
+            Rank::Five => "Five",
+            Rank::Six => "Six",
+            Rank::Seven => "Seven",
+            Rank::Eight => "Eight",
+            Rank::Nine => "Nine",
+            Rank::Ten => "Ten",
+            Rank::Jack => "Jack",
+            Rank::Queen => "Queen",
+            Rank::King => "King",
+        }
+    }
 }
 
 impl TryFrom<char> for Rank {
