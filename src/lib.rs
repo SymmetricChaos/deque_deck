@@ -1,3 +1,7 @@
+use std::collections::VecDeque;
+
+use rand::{Rng, random};
+
 
 #[repr(u8)]
 #[derive(Debug, Copy, Clone, PartialEq, Eq)]
@@ -32,6 +36,20 @@ impl Suit {
             Suit::Spades => &Suit::SPADES,
         }
         
+    }
+}
+
+impl TryFrom<char> for Suit {
+    type Error = &'static str;
+
+    fn try_from(value: char) -> Result<Self, Self::Error> {
+        Ok(match value {
+            'C' => Suit::Clubs,
+            'H' => Suit::Hearts,
+            'D' => Suit::Diamonds,
+            'S' => Suit::Spades,
+            _ => return Err("invalid char for suit")
+        })
     }
 }
 
@@ -75,6 +93,30 @@ impl Rank {
     }
 }
 
+impl TryFrom<char> for Rank {
+    type Error = &'static str;
+
+    fn try_from(value: char) -> Result<Self, Self::Error> {
+        Ok(match value {
+            'A' => Rank::Ace,
+            '1' => Rank::One,
+            '2' => Rank::Two,
+            '3' => Rank::Three,
+            '4' => Rank::Four,
+            '5' => Rank::Five,
+            '6' => Rank::Six,
+            '7' => Rank::Seven,
+            '8' => Rank::Eight,
+            '9' => Rank::Nine,
+            'T' => Rank::Ten,
+            'J' => Rank::Jack,
+            'Q' => Rank::Queen,
+            'K' => Rank::King,
+            _ => return Err("invalid char for rank")
+        })
+    }
+}
+
 
 #[derive(Debug, Copy, Clone)]
 pub struct PlayingCard{
@@ -84,6 +126,7 @@ pub struct PlayingCard{
 
 impl PlayingCard {
 
+    /// The full English name of the card.
     fn name(&self) -> &'static str {
         match self.rank {
             Rank::Ace => match self.suit {
@@ -173,15 +216,97 @@ impl PlayingCard {
         }
     }
 
+    /// Return the character pair that represents the rank and suit.
     fn pair(&self) -> (char,char) {
-        (self.rank.symbol(),self.suit.symbol())
+        (self.rank.symbol(), self.suit.symbol())
     }
 
+    /// Return the Unicode character for this card.
     fn unicode(&self) -> char {
         self.suit.cards()[self.rank as usize]
     }
 }
 
+impl TryFrom<(char,char)> for PlayingCard {
+    type Error = &'static str;
+
+    fn try_from(value: (char,char)) -> Result<Self, Self::Error> {
+        let rank = Rank::try_from(value.0)?;
+        let suit = Suit::try_from(value.1)?;
+        Ok(PlayingCard{rank,suit})
+    }
+}
+
+
+
+pub struct Deck {
+    cards: VecDeque<PlayingCard>
+}
+
+impl Deck {
+
+    pub fn new() -> Deck {
+        Deck { 
+            cards: VecDeque::from(
+                []
+            )
+        }
+    }
+
+    /// Draw the top card of the deck.
+    pub fn draw_top(&mut self) -> Option<PlayingCard> {
+        self.cards.pop_front()
+    }
+
+    /// Draw the bottom card of the deck.
+    pub fn draw_bottom(&mut self) -> Option<PlayingCard> {
+        self.cards.pop_back()
+    }
+
+    /// Draw the nth card of the top. 0 draws the top card.
+    pub fn draw_nth(&mut self, n: usize) -> Option<PlayingCard> {
+        self.cards.remove(n)
+    }
+
+
+    /// Draw a random card from the deck.
+    pub fn draw_random(&mut self) -> Option<PlayingCard> {
+        let mut rng = rand::thread_rng();
+        let n = rng.gen_range(0..self.cards.len());
+        self.draw_nth(n)
+    }
+
+
+
+    /// Place the card on top of the deck.
+    pub fn place_top(&mut self, card: PlayingCard) {
+        self.cards.push_front(card)
+    }
+
+    /// Place the card on the bottom of the deck.
+    pub fn place_bottom(&mut self, card: PlayingCard) {
+        self.cards.push_back(card)
+    }
+    
+    /// Place the card in the nth position in the deck. 0 places it on the top.
+    pub fn place_nth(&mut self, n: usize, card: PlayingCard) {
+        self.cards.insert(n, card);
+    }
+
+    /// Place the card at a random position in the deck.
+    pub fn place_random(&mut self, card: PlayingCard) {
+        let mut rng = rand::thread_rng();
+        let n = rng.gen_range(0..self.cards.len());
+        self.place_nth(n, card)
+    }
+
+
+
+    /// Shuffle the deck.
+    pub fn shuffle(&mut self) {
+        self.shuffle()
+    }
+}
 
 
 
