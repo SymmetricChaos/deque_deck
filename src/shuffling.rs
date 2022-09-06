@@ -38,7 +38,7 @@ impl<T> Deck<T> {
         new
     }
 
-    /// Combine the Deck with another deck, in place, via a riffle shuffle.
+    /// Riffle shuffle another Deck into this one. The insertions are done in place and the other Deck is consumed.
     pub fn riffle_with(&mut self, mut right: Deck<T>) {
         if self.len() == 0 {
             self.extend(right);
@@ -48,6 +48,8 @@ impl<T> Deck<T> {
         let mut l_len = self.len();
         let mut r_len = right.len();
         let mut cursor = 0;
+
+        self.cards.reserve_exact(r_len);
 
         loop {
             if r_len == 0 {
@@ -77,13 +79,19 @@ impl<T> Deck<T> {
         }
     }
 
+    /// Extends the Deck with another and then shuffle the result.
+    pub fn shuffle_with(&mut self, right: Deck<T>) {
+        self.extend(right);
+        self.shuffle();
+    }
+
     /// Perform a Fisher-Yates shuffle on the deck. This is a mathematically correct shuffle that gives every card an equal chance of ending up at any postion.
     pub fn shuffle(&mut self) {
         let mut rng = rand::thread_rng();
         self.cards.make_contiguous().shuffle(&mut rng);
     }
 
-    /// Perform a single riffle shuffle of the deck. See .riffle() for details.
+    /// Perform a single riffle shuffle of the deck. See .from_riffle() for details.
     pub fn shuffle_riffle(&mut self) {
         let right = self.split_off_binom();
         self.riffle_with(right);

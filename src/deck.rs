@@ -51,6 +51,35 @@ impl<T> Deck<T> {
         self.cards.get_mut(n)
     }
 
+    /// Swap cards i and j, returns an error if either is out of bounds.
+    pub fn swap(&mut self, i: usize, j: usize) -> Result<(), &'static str> {
+        if i >= self.len() || j >= self.len() {
+            return Err("index out of bounds");
+        }
+        self.cards.swap(i, j);
+        Ok(())
+    }
+
+    /// A reference to the top card or None if empty.
+    pub fn top(&self) -> Option<&T> {
+        self.cards.front()
+    }
+
+    /// A mutable reference to the top card or None if empty.
+    pub fn top_mut(&mut self) -> Option<&mut T> {
+        self.cards.front_mut()
+    }
+
+    /// A reference to the bottom card or None if empty.
+    pub fn bottom(&self) -> Option<&T> {
+        self.cards.back()
+    }
+
+    /// A mutable reference to the bottom card or None if empty.
+    pub fn bottom_mut(&mut self) -> Option<&mut T> {
+        self.cards.back_mut()
+    }
+
     /// Draw the top card of the deck.
     pub fn draw_top(&mut self) -> Option<T> {
         self.cards.pop_front()
