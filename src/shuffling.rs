@@ -113,7 +113,7 @@ impl<T> Deck<T> {
 }
 
 impl<T: Clone> Deck<T> {
-    /// Perform a perfect riffle shuffle (aka a faro shuffle). The deck must contain an even number of cards. This is not a fair shuffle.
+    /// Perform a perfect riffle shuffle (aka a faro shuffle). The deck must contain an even number of cards. This is not a true shuffle.
     pub fn shuffle_faro(&mut self, out: bool) -> Result<(), &'static str> {
         let n = self.cards.len();
         if n % 2 == 0 {
@@ -136,27 +136,38 @@ impl<T: Clone> Deck<T> {
         }
         Ok(())
     }
-}
 
-#[cfg(test)]
-mod test_deck {
-    use super::*;
-    // #[test]
-    // fn riffle() {
-    //     for _ in 0..10 {
-    //         let left = Deck::from([0, 1, 2, 3, 4, 5, 6, 7, 8, 9]);
-    //         let right = Deck::from([10, 11, 12, 13, 14, 15, 16, 17, 18, 19]);
-    //         println!("{:?}", Deck::riffle(left, right))
-    //     }
-    // }
-
-    #[test]
-    fn riffle_in_place() {
-        for _ in 0..10 {
-            let mut left = Deck::from([0, 1, 2, 3, 4, 5, 6, 7, 8, 9]);
-            let right = Deck::from([10, 11, 12, 13, 14, 15, 16, 17, 18, 19]);
-            left.riffle_with(right);
-            println!("{:?}", left)
+    /// Perform a pile shuffle using n piles. This is not a true shuffle.
+    pub fn shuffle_pile(&mut self, n: usize) {
+        let mut decks = vec![Deck::empty(); n];
+        let mut ctr = 0;
+        for card in self.clone().into_iter() {
+            decks[ctr].place_top(card);
+            ctr = (ctr + 1) % n;
         }
+        *self = decks.iter().cloned().collect();
     }
 }
+
+// #[cfg(test)]
+// mod test_deck {
+//     use super::*;
+//     #[test]
+//     fn riffle() {
+//         for _ in 0..10 {
+//             let left = Deck::from([0, 1, 2, 3, 4, 5, 6, 7, 8, 9]);
+//             let right = Deck::from([10, 11, 12, 13, 14, 15, 16, 17, 18, 19]);
+//             println!("{:?}", Deck::riffle(left, right))
+//         }
+//     }
+//
+//     #[test]
+//     fn riffle_in_place() {
+//         for _ in 0..10 {
+//             let mut left = Deck::from([0, 1, 2, 3, 4, 5, 6, 7, 8, 9]);
+//             let right = Deck::from([10, 11, 12, 13, 14, 15, 16, 17, 18, 19]);
+//             left.riffle_with(right);
+//             println!("{:?}", left)
+//         }
+//     }
+// }

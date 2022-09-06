@@ -3,17 +3,17 @@ use std::{collections::VecDeque, fmt::Debug};
 use rand::Rng;
 use rand_distr::{Binomial, Distribution};
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct Deck<T> {
-    pub(crate) cards: VecDeque<T>,
+    pub cards: VecDeque<T>,
 }
 
-impl<PlayingCard> Deck<PlayingCard> {
-    /// Create a deck of PlayingCard in canonical order.
-    pub fn new() -> Deck<PlayingCard> {
-        todo!("Create a deck of PlayingCard in canonical order.")
-    }
-}
+// impl<PlayingCard> Deck<PlayingCard> {
+//     /// Create a deck of PlayingCard in canonical order.
+//     pub fn new() -> Deck<PlayingCard> {
+//         todo!("Create a deck of PlayingCard in canonical order.")
+//     }
+// }
 
 impl<T> Deck<T> {
     pub(crate) fn binom(&self) -> usize {
@@ -216,6 +216,28 @@ impl<T> FromIterator<T> for Deck<T> {
         let mut cards = VecDeque::with_capacity(lower);
         cards.extend(iterator);
         Deck { cards }
+    }
+}
+
+/// Gather a Vec of several Decks into a single deck.
+impl<T> From<Vec<Deck<T>>> for Deck<T> {
+    fn from(vec: Vec<Deck<T>>) -> Self {
+        let mut out = Deck::with_capacity(vec.iter().map(|d| d.len()).sum());
+        for deck in vec {
+            out.extend(deck)
+        }
+        out
+    }
+}
+
+/// Gather an Iterator of several Decks into a single deck.
+impl<T> FromIterator<Deck<T>> for Deck<T> {
+    fn from_iter<I: IntoIterator<Item = Deck<T>>>(iter: I) -> Self {
+        let mut out = Deck::empty();
+        for deck in iter.into_iter() {
+            out.extend(deck)
+        }
+        out
     }
 }
 
