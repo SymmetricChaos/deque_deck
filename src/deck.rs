@@ -218,6 +218,12 @@ impl<T: Clone> Deck<T> {
     }
 }
 
+impl<T: Ord> Deck<T> {
+    pub fn sort(&mut self) {
+        self.cards.make_contiguous().sort()
+    }
+}
+
 impl<T, const N: usize> From<[T; N]> for Deck<T> {
     fn from(arr: [T; N]) -> Self {
         Deck {
@@ -252,15 +258,15 @@ impl<T> FromIterator<T> for Deck<T> {
     }
 }
 
-// impl<T> IntoIterator<T> for Deck<T> {
-//     type Item;
+impl<T> IntoIterator for Deck<T> {
+    type Item = T;
 
-//     type IntoIter;
+    type IntoIter = std::collections::vec_deque::IntoIter<Self::Item>;
 
-//     fn into_iter(self) -> Self::IntoIter {
-//         todo!()
-//     }
-// }
+    fn into_iter(self) -> Self::IntoIter {
+        self.cards.into_iter()
+    }
+}
 
 #[cfg(test)]
 mod test_deck {
