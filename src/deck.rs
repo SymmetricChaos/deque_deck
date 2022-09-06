@@ -76,7 +76,7 @@ impl<T> Deck<T> {
         self.draw_nth(self.uniform())
     }
 
-    /// Draw a card from the deck following a binomial distribution, simulating human selection.
+    /// Draw a card from the deck following a binomial distribution.
     pub fn draw_binom(&mut self) -> Option<T> {
         self.draw_nth(self.binom())
     }
@@ -101,7 +101,7 @@ impl<T> Deck<T> {
         self.place_nth(self.uniform(), card)
     }
 
-    /// Place a card into the deck following a binomial distribution, simulating human selection.
+    /// Place a card into the deck following a binomial distribution.
     pub fn place_binom(&mut self, card: T) {
         self.place_nth(self.binom(), card)
     }
@@ -116,7 +116,7 @@ impl<T> Deck<T> {
         self.cards.rotate_left(self.uniform())
     }
 
-    /// Cut the deck following a binomial distribution, simulating human selection.
+    /// Cut the deck following a binomial distribution.
     pub fn cut_binom(&mut self) {
         self.cards.rotate_left(self.binom())
     }
@@ -131,24 +131,24 @@ impl<T> Deck<T> {
         self.split_off_nth(self.uniform())
     }
 
-    /// Split the deck following a binomial distribution, simulating human selection, retaining the top part.
+    /// Split the deck following a binomial distribution, retaining the top part.
     pub fn split_off_binom(&mut self) -> Deck<T> {
         self.split_off_nth(self.binom())
     }
 
-    /// Split the deck at the nth position.
+    /// Split the deck at the nth position, consuming it.
     pub fn split_nth(mut self, n: usize) -> (Deck<T>, Deck<T>) {
         let cards = self.cards.split_off(n);
         (Deck::from(self.cards), Deck::from(cards))
     }
 
-    /// Split the deck at a random position.
+    /// Split the deck at a random position, consuming it.
     pub fn split_random(self) -> (Deck<T>, Deck<T>) {
         let n = self.uniform();
         self.split_nth(n)
     }
 
-    /// Split the deck following a binomial distribution, simulating human selection.
+    /// Split the deck following a binomial distribution, consuming it.
     pub fn split_binom(self) -> (Deck<T>, Deck<T>) {
         let n = self.binom();
         self.split_nth(n)
