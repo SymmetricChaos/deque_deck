@@ -1,4 +1,4 @@
-use rand::seq::SliceRandom;
+use rand::{seq::SliceRandom, thread_rng};
 use rand_distr::{Bernoulli, Distribution};
 
 use crate::deck::Deck;
@@ -9,33 +9,22 @@ fn bern(p: f64) -> bool {
 }
 
 impl<T> Deck<T> {
-    /// Consumes two Decks and returns the result of riffling them together using the Gilbert-Shannon-Reeds algorithm. This is a slow and statistically poor quality shuffle that simulates a single riffle shuffle. For good mixing several riffles are needed.
-    pub fn from_riffle(mut left: Deck<T>, mut right: Deck<T>) -> Deck<T> {
-        let n = left.len() + right.len();
-        let mut new: Deck<T> = Deck::with_capacity(n);
-        for _ in 0..n {
-            // We're going to hope decks are restricted to billions of cards here
-            let l = left.len() as f64;
-            let r = right.len() as f64;
-            if bern(r / (l + r)) {
-                match left.draw_top() {
-                    Some(card) => new.place_bottom(card),
-                    None => {
-                        new.extend(right);
-                        break;
-                    }
-                }
-            } else {
-                match right.draw_top() {
-                    Some(card) => new.place_bottom(card),
-                    None => {
-                        new.extend(left);
-                        break;
-                    }
-                }
-            }
-        }
-        new
+    /// Perform a Fisher-Yates shuffle on the deck. This is a mathematically correct shuffle that gives every card an equal chance of ending up at any postion.
+    pub fn shuffle(&mut self) {
+        let mut rng = rand::thread_rng();
+        self.cards.make_contiguous().shuffle(&mut rng);
+    }
+
+    /// Extends the Deck with another and then shuffle the result.
+    pub fn shuffle_with(&mut self, right: Deck<T>) {
+        self.extend(right);
+        self.shuffle();
+    }
+
+    /// Perform a single riffle shuffle of the deck using the Gilbert-Shannon-Reeds algorithm.
+    pub fn riffle(&mut self) {
+        let right = self.split_off_binom();
+        self.riffle_with(right);
     }
 
     /// Riffle shuffle another Deck into this one. The insertions are done in place and the other Deck is consumed.
@@ -79,26 +68,8 @@ impl<T> Deck<T> {
         }
     }
 
-    /// Extends the Deck with another and then shuffle the result.
-    pub fn shuffle_with(&mut self, right: Deck<T>) {
-        self.extend(right);
-        self.shuffle();
-    }
-
-    /// Perform a Fisher-Yates shuffle on the deck. This is a mathematically correct shuffle that gives every card an equal chance of ending up at any postion.
-    pub fn shuffle(&mut self) {
-        let mut rng = rand::thread_rng();
-        self.cards.make_contiguous().shuffle(&mut rng);
-    }
-
-    /// Perform a single riffle shuffle of the deck. See .from_riffle() for details.
-    pub fn shuffle_riffle(&mut self) {
-        let right = self.split_off_binom();
-        self.riffle_with(right);
-    }
-
     /// Perform a Gilbreath shuffle on the deck that uses n cards. This is not a fair shuffle.
-    pub fn shuffle_gilbreath(&mut self, n: usize) -> Result<(), &'static str> {
+    pub fn gilbreath(&mut self, n: usize) -> Result<(), &'static str> {
         if n > self.len() {
             return Err("n must be less than the number of cards in the deck");
         }
@@ -114,7 +85,7 @@ impl<T> Deck<T> {
 
 impl<T: Clone> Deck<T> {
     /// Perform a perfect riffle shuffle (aka a faro shuffle). The deck must contain an even number of cards. This is not a true shuffle.
-    pub fn shuffle_faro(&mut self, out: bool) -> Result<(), &'static str> {
+    pub fn faro(&mut self, out: bool) -> Result<(), &'static str> {
         let n = self.cards.len();
         if n % 2 == 0 {
             return Err("a faro shuffle requires an even number of cards");
@@ -137,14 +108,15 @@ impl<T: Clone> Deck<T> {
         Ok(())
     }
 
-    /// Perform a pile shuffle using n piles. This is not a true shuffle.
-    pub fn shuffle_pile(&mut self, n: usize) {
+    /// Perform a pile shuffle using n piles. Poor randomization.
+    pub fn pile_shuffle(&mut self, n: usize) {
         let mut decks = vec![Deck::empty(); n];
         let mut ctr = 0;
         for card in self.clone().into_iter() {
             decks[ctr].place_top(card);
             ctr = (ctr + 1) % n;
         }
+        decks.shuffle(&mut thread_rng());
         *self = decks.iter().cloned().collect();
     }
 }
