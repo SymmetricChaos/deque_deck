@@ -193,6 +193,20 @@ impl<T> Deck<T> {
         let n = self.binom();
         self.split_nth(n)
     }
+
+    /// Perform a cycle permutation on the cards of the Deck. If any index
+    /// is invalid an error is returned before any swaps are made.
+    pub fn cycle(&mut self, cycle: &[usize]) -> Result<(), &'static str> {
+        for pos in cycle {
+            if *pos >= self.len() {
+                return Err("index out of bounds");
+            }
+        }
+        for pair in cycle.windows(2) {
+            self.swap(pair[0], pair[1]).unwrap()
+        }
+        Ok(())
+    }
 }
 
 impl<T: Ord> Deck<T> {
@@ -315,5 +329,12 @@ mod test_deck {
         let mut deck = Deck::from([1, 2, 3, 4, 5, 6]);
         deck.cut_nth(3);
         assert_eq!(deck, Deck::from([4, 5, 6, 1, 2, 3]));
+    }
+
+    #[test]
+    fn cycle() {
+        let mut deck = Deck::from([0, 1, 2]);
+        deck.cycle(&[0, 1, 2]).unwrap();
+        assert_eq!(deck, Deck::from([1, 2, 0]));
     }
 }
