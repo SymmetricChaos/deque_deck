@@ -81,33 +81,28 @@ impl<T> Deck<T> {
 
         Ok(())
     }
+
+    /// Perform a perfect riffle shuffle (aka a faro shuffle). This is not a true shuffle as it is entirely deterministic.
+    pub fn faro(&mut self, out: bool) -> Result<(), &'static str> {
+        let len = self.len();
+
+        let right = self.split_off_nth(len / 2);
+
+        let mut cursor = match out {
+            true => 1,
+            false => 0,
+        };
+
+        for card in right {
+            self.place_nth(cursor, card);
+            cursor += 2;
+        }
+
+        Ok(())
+    }
 }
 
 impl<T: Clone> Deck<T> {
-    /// Perform a perfect riffle shuffle (aka a faro shuffle). The deck must contain an even number of cards. This is not a true shuffle.
-    pub fn faro(&mut self, out: bool) -> Result<(), &'static str> {
-        let n = self.cards.len();
-        if n % 2 == 0 {
-            return Err("a faro shuffle requires an even number of cards");
-        } else {
-            let mut new: Deck<T> = Deck::with_capacity(n);
-            let cards = Deck::from(self.cards.clone());
-            let (mut left, mut right) = cards.split_nth(n / 2);
-            if out {
-                for _ in 0..(n / 2) {
-                    new.place_top(left.draw_top().unwrap());
-                    new.place_top(right.draw_top().unwrap());
-                }
-            } else {
-                for _ in 0..(n / 2) {
-                    new.place_top(right.draw_top().unwrap());
-                    new.place_top(left.draw_top().unwrap());
-                }
-            }
-        }
-        Ok(())
-    }
-
     /// Perform a pile shuffle using n piles. Poor randomization.
     pub fn pile_shuffle(&mut self, n: usize) {
         let mut decks = vec![Deck::empty(); n];
@@ -121,25 +116,35 @@ impl<T: Clone> Deck<T> {
     }
 }
 
-// #[cfg(test)]
-// mod test_deck {
-//     use super::*;
-//     #[test]
-//     fn riffle() {
-//         for _ in 0..10 {
-//             let left = Deck::from([0, 1, 2, 3, 4, 5, 6, 7, 8, 9]);
-//             let right = Deck::from([10, 11, 12, 13, 14, 15, 16, 17, 18, 19]);
-//             println!("{:?}", Deck::riffle(left, right))
-//         }
-//     }
-//
-//     #[test]
-//     fn riffle_in_place() {
-//         for _ in 0..10 {
-//             let mut left = Deck::from([0, 1, 2, 3, 4, 5, 6, 7, 8, 9]);
-//             let right = Deck::from([10, 11, 12, 13, 14, 15, 16, 17, 18, 19]);
-//             left.riffle_with(right);
-//             println!("{:?}", left)
-//         }
-//     }
-// }
+#[cfg(test)]
+mod test_deck {
+    use super::*;
+
+    // #[test]
+    // fn riffle_in_place() {
+    //     for _ in 0..10 {
+    //         let mut left = Deck::from([0, 1, 2, 3, 4, 5, 6, 7, 8, 9]);
+    //         let right = Deck::from([10, 11, 12, 13, 14, 15, 16, 17, 18, 19]);
+    //         left.riffle_with(right);
+    //         println!("{:?}", left)
+    //     }
+    // }
+
+    #[test]
+    fn faro_in_place() {
+        // Out shuffle places the first card on top
+        let mut deck = Deck::from([0, 1, 2, 3, 4, 5, 6, 7, 8, 9]);
+        deck.faro(true).unwrap();
+        assert_eq!(deck, Deck::from([0, 5, 1, 6, 2, 7, 3, 8, 4, 9]));
+
+        // In shuffle places the first card in the second position
+        let mut deck = Deck::from([0, 1, 2, 3, 4, 5, 6, 7, 8, 9]);
+        deck.faro(false).unwrap();
+        assert_eq!(deck, Deck::from([5, 0, 6, 1, 7, 2, 8, 3, 9, 4]));
+
+        // Check an odd number of cards
+        let mut deck = Deck::from([0, 1, 2, 3, 4, 5, 6, 7, 8]);
+        deck.faro(false).unwrap();
+        assert_eq!(deck, Deck::from([4, 0, 5, 1, 6, 2, 7, 3, 8]));
+    }
+}

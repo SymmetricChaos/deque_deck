@@ -3,7 +3,7 @@ use std::{collections::VecDeque, fmt::Debug};
 use rand::Rng;
 use rand_distr::{Binomial, Distribution};
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, PartialEq)]
 pub struct Deck<T> {
     pub cards: VecDeque<T>,
 }
