@@ -107,12 +107,12 @@ impl<T: Clone> Deck<T> {
     pub fn pile_shuffle(&mut self, n: usize) {
         let mut decks = vec![Deck::empty(); n];
         let mut ctr = 0;
-        for card in self.clone().into_iter() {
-            decks[ctr].place_top(card);
+        for _ in 0..self.len() {
+            decks[ctr].place_top(self.draw_top().unwrap());
             ctr = (ctr + 1) % n;
         }
         decks.shuffle(&mut thread_rng());
-        *self = decks.iter().cloned().collect();
+        *self = Deck::from(decks);
     }
 }
 
@@ -147,4 +147,11 @@ mod test_deck {
         deck.faro(false);
         assert_eq!(deck, Deck::from([4, 0, 5, 1, 6, 2, 7, 3, 8]));
     }
+
+    // #[test]
+    // fn pile_shuffle() {
+    //     let mut deck = Deck::from([0, 1, 2, 3, 4, 5, 6, 7, 8, 9]);
+    //     deck.pile_shuffle(3);
+    //     println!("{:?}", deck);
+    // }
 }
