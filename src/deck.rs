@@ -3,7 +3,7 @@ use std::{collections::VecDeque, fmt::Debug};
 use rand::Rng;
 use rand_distr::{Binomial, Distribution};
 
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, Default)]
 pub struct Deck<T> {
     pub cards: VecDeque<T>,
 }
@@ -16,6 +16,10 @@ pub struct Deck<T> {
 // }
 
 impl<T> Deck<T> {
+    // This is used to simulate a human making a selection of where to cut a deck. Strictly speaking humans
+    // are much more biased than a binomial distribution. However for a 52 card deck there is a 99.98%
+    // probability of selecting in the middle half and a 93% chance of selecting in the middle quarter of
+    // the deck.
     pub(crate) fn binom(&self) -> usize {
         let bin = Binomial::new(self.cards.len().try_into().unwrap(), 0.5).unwrap();
         usize::try_from(bin.sample(&mut rand::thread_rng())).unwrap()
@@ -33,10 +37,12 @@ impl<T> Deck<T> {
         Deck::from(VecDeque::with_capacity(n))
     }
 
+    // Number of cards in the Deck.
     pub fn len(&self) -> usize {
         self.cards.len()
     }
 
+    // Append the Deck with the cards of another Deck, consuming the other.
     pub fn extend(&mut self, other: Deck<T>) {
         self.cards.extend(other.cards)
     }
@@ -51,6 +57,16 @@ impl<T> Deck<T> {
         self.cards.get_mut(n)
     }
 
+    /// A front to back iterator of references.
+    pub fn iter(&self) -> std::collections::vec_deque::Iter<T> {
+        self.cards.iter()
+    }
+
+    /// A front to back iterator of mutable references.
+    pub fn iter_mut(&mut self) -> std::collections::vec_deque::IterMut<T> {
+        self.cards.iter_mut()
+    }
+
     /// Swap cards i and j, returns an error if either is out of bounds.
     pub fn swap(&mut self, i: usize, j: usize) -> Result<(), &'static str> {
         if i >= self.len() || j >= self.len() {
@@ -60,22 +76,22 @@ impl<T> Deck<T> {
         Ok(())
     }
 
-    /// A reference to the top card or None if empty.
+    /// A reference to the top card.
     pub fn top(&self) -> Option<&T> {
         self.cards.front()
     }
 
-    /// A mutable reference to the top card or None if empty.
+    /// A mutable reference to the top card.
     pub fn top_mut(&mut self) -> Option<&mut T> {
         self.cards.front_mut()
     }
 
-    /// A reference to the bottom card or None if empty.
+    /// A reference to the bottom card.
     pub fn bottom(&self) -> Option<&T> {
         self.cards.back()
     }
 
-    /// A mutable reference to the bottom card or None if empty.
+    /// A mutable reference to the bottom card.
     pub fn bottom_mut(&mut self) -> Option<&mut T> {
         self.cards.back_mut()
     }
@@ -294,22 +310,10 @@ mod test_deck {
         assert_eq!(deck.get(3).unwrap(), &100);
     }
 
-    // #[test]
-    // fn riffle() {
-    //     for _ in 0..10 {
-    //         let left = Deck::from([0, 1, 2, 3, 4, 5, 6, 7, 8, 9]);
-    //         let right = Deck::from([10, 11, 12, 13, 14, 15, 16, 17, 18, 19]);
-    //         println!("{:?}", Deck::riffle(left, right))
-    //     }
-    // }
-
     #[test]
-    fn riffle_in_place() {
-        for _ in 0..10 {
-            let mut left = Deck::from([0, 1, 2, 3, 4, 5, 6, 7, 8, 9]);
-            let right = Deck::from([10, 11, 12, 13, 14, 15, 16, 17, 18, 19]);
-            left.riffle_with(right);
-            println!("{:?}", left)
-        }
+    fn cut_nth() {
+        let mut deck = Deck::from([1, 2, 3, 4, 5, 6]);
+        deck.cut_nth(3);
+        assert_eq!(deck, Deck::from([4, 5, 6, 1, 2, 3]));
     }
 }

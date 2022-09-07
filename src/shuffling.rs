@@ -21,13 +21,13 @@ impl<T> Deck<T> {
         self.shuffle();
     }
 
-    /// Perform a single riffle shuffle of the deck using the Gilbert-Shannon-Reeds algorithm.
+    /// Perform a single riffle shuffle of the deck using the Gilbert-Shannon-Reeds algorithm. Poor randomization.
     pub fn riffle(&mut self) {
         let right = self.split_off_binom();
         self.riffle_with(right);
     }
 
-    /// Riffle shuffle another Deck into this one. The insertions are done in place and the other Deck is consumed.
+    /// Riffle shuffle another Deck into this one, consuming the other Deck.
     pub fn riffle_with(&mut self, mut right: Deck<T>) {
         if self.len() == 0 {
             self.extend(right);
@@ -68,7 +68,7 @@ impl<T> Deck<T> {
         }
     }
 
-    /// Perform a Gilbreath shuffle on the deck that uses n cards. This is not a fair shuffle.
+    /// Perform a Gilbreath shuffle on the deck that uses n cards. Poor randomization.
     pub fn gilbreath(&mut self, n: usize) -> Result<(), &'static str> {
         if n > self.len() {
             return Err("n must be less than the number of cards in the deck");
@@ -82,8 +82,10 @@ impl<T> Deck<T> {
         Ok(())
     }
 
-    /// Perform a perfect riffle shuffle (aka a faro shuffle). This is not a true shuffle as it is entirely deterministic.
-    pub fn faro(&mut self, out: bool) -> Result<(), &'static str> {
+    /// Perform a faro shuffle (a perfect riffle shuffle). An out shuffle places the first card
+    /// on top. An in shuffle places the first card second. This is not a true shuffle as it is
+    /// entirely deterministic.
+    pub fn faro(&mut self, out: bool) {
         let len = self.len();
 
         let right = self.split_off_nth(len / 2);
@@ -97,13 +99,11 @@ impl<T> Deck<T> {
             self.place_nth(cursor, card);
             cursor += 2;
         }
-
-        Ok(())
     }
 }
 
 impl<T: Clone> Deck<T> {
-    /// Perform a pile shuffle using n piles. Poor randomization.
+    /// Perform a pile shuffle using n piles. Very poor randomization.
     pub fn pile_shuffle(&mut self, n: usize) {
         let mut decks = vec![Deck::empty(); n];
         let mut ctr = 0;
@@ -134,17 +134,17 @@ mod test_deck {
     fn faro_in_place() {
         // Out shuffle places the first card on top
         let mut deck = Deck::from([0, 1, 2, 3, 4, 5, 6, 7, 8, 9]);
-        deck.faro(true).unwrap();
+        deck.faro(true);
         assert_eq!(deck, Deck::from([0, 5, 1, 6, 2, 7, 3, 8, 4, 9]));
 
         // In shuffle places the first card in the second position
         let mut deck = Deck::from([0, 1, 2, 3, 4, 5, 6, 7, 8, 9]);
-        deck.faro(false).unwrap();
+        deck.faro(false);
         assert_eq!(deck, Deck::from([5, 0, 6, 1, 7, 2, 8, 3, 9, 4]));
 
         // Check an odd number of cards
         let mut deck = Deck::from([0, 1, 2, 3, 4, 5, 6, 7, 8]);
-        deck.faro(false).unwrap();
+        deck.faro(false);
         assert_eq!(deck, Deck::from([4, 0, 5, 1, 6, 2, 7, 3, 8]));
     }
 }
