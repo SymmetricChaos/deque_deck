@@ -5,8 +5,8 @@ use crate::suit::Suit;
 
 #[derive(Debug, Copy, Clone, PartialEq, Eq)]
 pub struct PlayingCard {
-    rank: Rank,
-    suit: Suit,
+    pub rank: Rank,
+    pub suit: Suit,
 }
 
 impl PlayingCard {
