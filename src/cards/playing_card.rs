@@ -1,5 +1,7 @@
 use std::fmt::Display;
 
+use crate::deck::Deck;
+
 use super::rank::Rank;
 use super::suit::Suit;
 
@@ -41,9 +43,46 @@ impl TryFrom<(char, char)> for PlayingCard {
     }
 }
 
+// impl TryFrom<char> for PlayingCard {
+//     type Error = &'static str;
+
+//     fn try_from(value: char) -> Result<Self, Self::Error> {
+//         let n = u32::from(value);
+//         if n < 0x1F0A1 {
+//             return Err()
+//         }
+
+//         Ok(PlayingCard { rank, suit })
+//     }
+// }
+
 impl Display for PlayingCard {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         write!(f, "{}{}", self.pair().0, self.pair().1)
+    }
+}
+
+impl Deck<PlayingCard> {
+    /// Create a deck of PlayingCard in the canonical "new deck" order.
+    pub fn new() -> Deck<PlayingCard> {
+        let mut deck = Deck::with_capacity(52);
+        let rank_chars = "A23456789TJQK";
+
+        for suit in ['H', 'C'] {
+            for r in rank_chars.chars() {
+                let card = PlayingCard::try_from((r, suit)).unwrap();
+                deck.place_top(card)
+            }
+        }
+
+        for suit in ['D', 'S'] {
+            for r in rank_chars.chars().rev() {
+                let card = PlayingCard::try_from((r, suit)).unwrap();
+                deck.place_top(card)
+            }
+        }
+
+        deck
     }
 }
 
