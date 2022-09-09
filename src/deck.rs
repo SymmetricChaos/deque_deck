@@ -7,6 +7,8 @@ use rand::Rng;
 use rand_distr::{Binomial, Distribution};
 
 #[derive(Debug, Clone, PartialEq, Default)]
+/// A Deck is just a thin wrapper around a VecDeque with a variety of convenient methods provided. If insufficient
+/// control of the cards is not available through the Deck interface the VecDeque itself is accessible.
 pub struct Deck<T> {
     pub cards: VecDeque<T>,
 }
@@ -33,12 +35,12 @@ impl<T> Deck<T> {
         Deck::from(VecDeque::with_capacity(n))
     }
 
-    // Number of cards in the Deck.
+    /// Number of cards in the Deck.
     pub fn len(&self) -> usize {
         self.cards.len()
     }
 
-    // Append the Deck with the cards of another Deck, consuming the other.
+    /// Append the Deck with the cards of another Deck, consuming the other. The other deck is placed below this one.
     pub fn extend(&mut self, other: Deck<T>) {
         self.cards.extend(other.cards)
     }

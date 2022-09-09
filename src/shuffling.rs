@@ -82,8 +82,8 @@ impl<T> Deck<T> {
         Ok(())
     }
 
-    /// Perform a faro shuffle (a perfect riffle shuffle). An out shuffle places the first card
-    /// on top. An in shuffle places the first card second. This is not a true shuffle as it is
+    /// Perform a faro shuffle (a perfect riffle shuffle). An "out shuffle" places the first card
+    /// on top. An "in shuffle" places the first card second. This is not a true shuffle as it is
     /// entirely deterministic.
     pub fn faro(&mut self, out: bool) {
         let len = self.len();
