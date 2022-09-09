@@ -27,7 +27,7 @@ impl PlayingCard {
         (self.rank.symbol(), self.suit.unicode())
     }
 
-    /// Tthe Unicode character for this card.
+    /// The Unicode character for this card.
     fn unicode(&self) -> char {
         self.suit.cards()[self.rank as usize]
     }
