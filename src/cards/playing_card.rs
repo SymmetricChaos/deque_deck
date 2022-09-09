@@ -1,7 +1,7 @@
 use std::fmt::Display;
 
-use crate::rank::Rank;
-use crate::suit::Suit;
+use super::rank::Rank;
+use super::suit::Suit;
 
 #[derive(Debug, Copy, Clone, PartialEq, Eq)]
 pub struct PlayingCard {

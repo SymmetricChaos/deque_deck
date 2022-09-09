@@ -6,41 +6,9 @@ use std::{
 use rand::Rng;
 use rand_distr::{Binomial, Distribution};
 
-use crate::playing_card::PlayingCard;
-
 #[derive(Debug, Clone, PartialEq, Default)]
 pub struct Deck<T> {
     pub cards: VecDeque<T>,
-}
-
-impl<T> Deck<T> {
-    /// Create a deck of PlayingCard in canonical order.
-    pub fn new() -> Deck<PlayingCard> {
-        let mut deck = Deck::with_capacity(52);
-        let rank_chars = "A23456789TJQK";
-
-        for r in rank_chars.chars() {
-            let card = PlayingCard::try_from((r, 'H')).unwrap();
-            deck.place_top(card)
-        }
-
-        for r in rank_chars.chars() {
-            let card = PlayingCard::try_from((r, 'C')).unwrap();
-            deck.place_top(card)
-        }
-
-        for r in rank_chars.chars().rev() {
-            let card = PlayingCard::try_from((r, 'D')).unwrap();
-            deck.place_top(card)
-        }
-
-        for r in rank_chars.chars().rev() {
-            let card = PlayingCard::try_from((r, 'S')).unwrap();
-            deck.place_top(card)
-        }
-
-        deck
-    }
 }
 
 impl<T> Deck<T> {
@@ -322,7 +290,6 @@ impl<T> IntoIterator for Deck<T> {
 
 #[cfg(test)]
 mod test_deck {
-    use crate::playing_card::PlayingCard;
 
     use super::*;
 
@@ -377,11 +344,5 @@ mod test_deck {
         let mut deck = Deck::from([0, 1, 2]);
         deck.cycle(&[0, 1, 2]).unwrap();
         assert_eq!(deck, Deck::from([1, 2, 0]));
-    }
-
-    #[test]
-    fn new_deck() {
-        let deck = Deck::<PlayingCard>::new();
-        println!("{}", deck);
     }
 }
