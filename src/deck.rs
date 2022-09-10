@@ -8,7 +8,7 @@ use rand_distr::{Binomial, Distribution};
 
 #[derive(Debug, Clone, PartialEq, Default)]
 /// A Deck is just a thin wrapper around a VecDeque with a variety of convenient methods provided. If insufficient
-/// control of the cards is not available through the Deck interface the VecDeque itself is accessible.
+/// control of the cards is available through the Deck interface the VecDeque itself is accessible.
 pub struct Deck<T> {
     pub cards: VecDeque<T>,
 }
@@ -27,10 +27,12 @@ impl<T> Deck<T> {
         rand::thread_rng().gen_range(0..self.cards.len())
     }
 
+    /// Create an empty deck.
     pub fn empty() -> Deck<T> {
         Deck::from(VecDeque::new())
     }
 
+    /// Create an empty deck with a specific amount of capacity allocated.
     pub fn with_capacity(n: usize) -> Deck<T> {
         Deck::from(VecDeque::with_capacity(n))
     }
@@ -92,6 +94,11 @@ impl<T> Deck<T> {
     /// A mutable reference to the bottom card.
     pub fn bottom_mut(&mut self) -> Option<&mut T> {
         self.cards.back_mut()
+    }
+
+    /// Draw the top card of the deck. Alias for .draw_top() as this is a common operation.
+    pub fn draw(&mut self) -> Option<T> {
+        self.cards.pop_front()
     }
 
     /// Draw the top card of the deck.
