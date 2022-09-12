@@ -68,6 +68,27 @@ impl<T> Deck<T> {
         }
     }
 
+    /// Performs the inverse of a riffle shuffle. This is equivalent to taking cards at random from the deck (in order) to make a new
+    /// deck then placing the remains of the original on top. However this is done without creating an additional deck.
+    pub fn inverse_riffle(&mut self) {
+        let mut cursor = 0;
+        let mut ctr = 0;
+        loop {
+            if ctr == self.len() {
+                break;
+            }
+            if bern(0.5) {
+                let card = self
+                    .draw_nth(cursor)
+                    .expect("cursor should not be out of bounds");
+                self.place_bottom(card);
+            } else {
+                cursor += 1
+            }
+            ctr += 1
+        }
+    }
+
     /// Perform a Gilbreath shuffle on the deck that uses n cards. Poor randomization.
     pub fn gilbreath(&mut self, n: usize) -> Result<(), &'static str> {
         if n > self.len() {
@@ -126,6 +147,15 @@ mod test_deck {
     //         let mut left = Deck::from([0, 1, 2, 3, 4, 5, 6, 7, 8, 9]);
     //         let right = Deck::from([10, 11, 12, 13, 14, 15, 16, 17, 18, 19]);
     //         left.riffle_with(right);
+    //         println!("{:?}", left)
+    //     }
+    // }
+
+    // #[test]
+    // fn inv_riffle_in_place() {
+    //     for _ in 0..10 {
+    //         let mut left = Deck::from([0, 1, 2, 3, 4, 5, 6, 7, 8, 9]);
+    //         left.inverse_riffle();
     //         println!("{:?}", left)
     //     }
     // }
