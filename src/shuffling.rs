@@ -9,13 +9,14 @@ fn bern(p: f64) -> bool {
 }
 
 impl<T> Deck<T> {
-    /// Perform a Fisher-Yates shuffle on the deck. This is a mathematically correct shuffle that gives every card an equal chance of ending up at any postion.
+    /// Perform a Fisher-Yates shuffle on the deck. This is a mathematically correct shuffle that gives every card
+    /// an equal chance of ending up at any postion. It should be perferred whenever thorough shuffling is needed.
     pub fn shuffle(&mut self) {
         let mut rng = rand::thread_rng();
         self.cards.make_contiguous().shuffle(&mut rng);
     }
 
-    /// Extends the Deck with another and then shuffle the result.
+    /// Extends the Deck with another and then shuffles the result.
     pub fn shuffle_with(&mut self, right: Deck<T>) {
         self.extend(right);
         self.shuffle();
