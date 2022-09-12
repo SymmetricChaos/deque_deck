@@ -1,7 +1,12 @@
 [package]
-name = "cards"
+name = "deque_deck"
 version = "0.1.0"
 edition = "2021"
+authors = ["SymmetricChaos <ajfraebel@gmail.com>"]
+description = "A simple API for manipulating and shuffling a deck of cards."
+license = "MIT"
+repository = "https://github.com/SymmetricChaos/deque_deck"
+keywords = ["cards", "shuffling", "deck", "deque"]
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
