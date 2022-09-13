@@ -104,6 +104,17 @@ impl<T> Deck<T> {
         Ok(())
     }
 
+    pub fn overhand(&mut self, p: f64) {
+        let mut lo = 0;
+        for i in 0..self.len() {
+            if bern(p) {
+                self.cards.make_contiguous()[lo..i].reverse();
+                lo = i
+            }
+        }
+        self.cards.make_contiguous().reverse()
+    }
+
     /// Perform a faro shuffle (a perfect riffle shuffle). An "out shuffle" places the first card
     /// on top. An "in shuffle" places the first card second. This is not a true shuffle as it is
     /// entirely deterministic.
