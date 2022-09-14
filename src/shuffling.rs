@@ -104,15 +104,32 @@ impl<T> Deck<T> {
         Ok(())
     }
 
+    /// Perform an overhand shuffle using Pemantle's algorithm
     pub fn overhand(&mut self, p: f64) {
+        let len = self.len();
+        let temp = self.cards.make_contiguous();
         let mut lo = 0;
-        for i in 0..self.len() {
+        for i in 0..len {
             if bern(p) {
-                self.cards.make_contiguous()[lo..i].reverse();
+                temp[lo..i].reverse();
                 lo = i
             }
         }
         self.cards.make_contiguous().reverse()
+    }
+
+    /// Premantle's original algorithm. This has similar statistical properties to an overhand shuffle
+    /// but does not recreate the shuffle itself. Runs about twice as fast.
+    pub fn premantle(&mut self, p: f64) {
+        let len = self.len();
+        let temp = self.cards.make_contiguous();
+        let mut lo = 0;
+        for i in 0..len {
+            if bern(p) {
+                temp[lo..i].reverse();
+                lo = i
+            }
+        }
     }
 
     /// Perform a faro shuffle (a perfect riffle shuffle). An "out shuffle" places the first card
@@ -154,12 +171,30 @@ mod test_deck {
     use super::*;
 
     // #[test]
-    // fn riffle_in_place() {
+    // fn rifflewith() {
     //     for _ in 0..10 {
     //         let mut left = Deck::from([0, 1, 2, 3, 4, 5, 6, 7, 8, 9]);
     //         let right = Deck::from([10, 11, 12, 13, 14, 15, 16, 17, 18, 19]);
     //         left.riffle_with(right);
     //         println!("{:?}", left)
+    //     }
+    // }
+
+    // #[test]
+    // fn riffle() {
+    //     for _ in 0..10 {
+    //         let mut deck = Deck::from([0, 1, 2, 3, 4, 5, 6, 7, 8, 9]);
+    //         deck.riffle();
+    //         println!("{:?}", deck)
+    //     }
+    // }
+
+    // #[test]
+    // fn overhand() {
+    //     for _ in 0..10 {
+    //         let mut deck = Deck::from([0, 1, 2, 3, 4, 5, 6, 7, 8, 9]);
+    //         deck.overhand(0.4);
+    //         println!("{:?}", deck)
     //     }
     // }
 
