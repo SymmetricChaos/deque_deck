@@ -40,7 +40,7 @@ The overhand method uses Pemantle’s algorithm to take packets of cards from th
  ```rust
 let mut deck = Deck::from([0,1,2,3,4,5,6,7,8,9]);
 deck.overhand();
-// Deck{ [9, 7, 8, 6, 3, 4, 5, 1, 2, ] }
+// Deck{ [9, 7, 8, 6, 3, 4, 5, 1, 2, 0] }
 ```
 
 ### Other Shuffles
