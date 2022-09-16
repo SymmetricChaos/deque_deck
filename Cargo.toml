@@ -1,6 +1,6 @@
 [package]
 name = "deque_deck"
-version = "0.1.0"
+version = "0.1.1"
 edition = "2021"
 authors = ["SymmetricChaos <ajfraebel@gmail.com>"]
 description = "A simple API for manipulating and shuffling a deck of cards."
