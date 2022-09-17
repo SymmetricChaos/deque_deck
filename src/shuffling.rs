@@ -196,6 +196,15 @@ mod test_deck {
     // }
 
     // #[test]
+    // fn gilbreath() {
+    //     for _ in 0..10 {
+    //         let mut deck = Deck::from([0, 1, 2, 3, 4, 5, 6, 7, 8, 9]);
+    //         deck.gilbreath(5).unwrap();
+    //         println!("{:?}", deck)
+    //     }
+    // }
+
+    // #[test]
     // fn overhand() {
     //     for _ in 0..10 {
     //         let mut deck = Deck::from([0, 1, 2, 3, 4, 5, 6, 7, 8, 9]);
