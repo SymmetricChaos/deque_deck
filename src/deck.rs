@@ -76,6 +76,11 @@ impl<T> Deck<T> {
         Ok(())
     }
 
+    /// Reverse the order of the entire deck.
+    pub fn reverse(&mut self) {
+        self.cards.make_contiguous().reverse()
+    }
+
     /// A reference to the top card.
     pub fn top(&self) -> Option<&T> {
         self.cards.front()
@@ -304,7 +309,7 @@ mod test_deck {
 
     #[test]
     fn draw_top() {
-        let mut deck = Deck::from([1, 2, 3, 4, 5, 6]);
+        let mut deck = Deck::from_iter(1..=6);
         assert_eq!(deck.draw_top().unwrap(), 1)
     }
 
@@ -353,5 +358,12 @@ mod test_deck {
         let mut deck = Deck::from([0, 1, 2]);
         deck.cycle(&[0, 1, 2]).unwrap();
         assert_eq!(deck, Deck::from([1, 2, 0]));
+    }
+
+    #[test]
+    fn reverse() {
+        let mut deck = Deck::from_iter(0..=9);
+        deck.reverse();
+        assert_eq!(deck, Deck::from([9, 8, 7, 6, 5, 4, 3, 2, 1, 0]));
     }
 }
