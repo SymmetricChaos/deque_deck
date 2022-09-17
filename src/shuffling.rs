@@ -155,6 +155,12 @@ impl<T> Deck<T> {
 impl<T: Clone> Deck<T> {
     /// Perform a pile shuffle using n piles. Very poor randomization.
     pub fn pile_shuffle(&mut self, n: usize) {
+        // If n is greather than or equal to the size of the deck
+        // it is equivalent to a Fisher-Yates shuffle
+        if n >= self.len() {
+            self.shuffle();
+            return;
+        }
         let mut decks = vec![Deck::empty(); n];
         let mut ctr = 0;
         for _ in 0..self.len() {
@@ -227,8 +233,10 @@ mod test_deck {
 
     // #[test]
     // fn pile_shuffle() {
-    //     let mut deck = Deck::from([0, 1, 2, 3, 4, 5, 6, 7, 8, 9]);
-    //     deck.pile_shuffle(3);
-    //     println!("{:?}", deck);
+    //     for _ in 0..5 {
+    //         let mut deck = Deck::from_iter(0..=9);
+    //         deck.pile_shuffle(3);
+    //         println!("{:?}", deck);
+    //     }
     // }
 }
