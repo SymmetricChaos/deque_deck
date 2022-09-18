@@ -28,6 +28,12 @@ impl<T> Deck<T> {
         self.riffle_with(right);
     }
 
+    /// Perform a single riffle shuffle of the deck using the Gilbert-Shannon-Reeds algorithm. Poor randomization.
+    pub fn riffle_at_nth(&mut self, n: usize) {
+        let right = self.split_off_nth(n);
+        self.riffle_with(right);
+    }
+
     /// Riffle shuffle another Deck into this one, consuming the other Deck.
     pub fn riffle_with(&mut self, mut right: Deck<T>) {
         if self.len() == 0 {
@@ -95,10 +101,9 @@ impl<T> Deck<T> {
         if n > self.len() {
             return Err("n must be less than the number of cards in the deck");
         }
-        let mut new: Deck<T> = Deck::with_capacity(n);
-        for _ in 0..n {
-            new.place_top(self.draw_top().unwrap())
-        }
+        let new = self.split_off_nth(n);
+
+        self.reverse();
         self.riffle_with(new);
 
         Ok(())
