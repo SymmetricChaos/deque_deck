@@ -8,7 +8,7 @@ Add this to your `Cargo.toml`:
  
 ```toml
 [dependencies]
-deque_deck = "0.1.0"
+deque_deck = "0.1.1"
 ```
 
 Standard manipulations of a deque data structure are available but for convenience have been renamed to reflect the language used for decks of cards. So "draw" is used in place of "pop" and "cut" is used in place of "left_rotate" and so on. 
@@ -34,15 +34,6 @@ deck.riffle();
 // Deck{ [5, 6, 0, 7, 1, 8, 2, 3, 4, 9] }
 ```
 
-### Gilbreath
-Deals off the top *n* cards of the deck then performs a riffle shuffle with the two decks.
-
- ```rust
-let mut deck = Deck::from_iter(0..10);
-deck.gilbreath(5);
-// Deck{ [5, 6, 4, 7, 8, 3, 2, 9, 1, 0] }
-```
-
 ### Overhand (Pemantle)
 The overhand method uses Pemantle’s algorithm to take packets of cards from the top and place them successively on the bottom. The probability of a card being the end of the next packet is given by the argument *n*.
 
@@ -61,6 +52,14 @@ deck.pile_shuffe(3);
 // Deck{ [8, 5, 2, 7, 4, 1, 9, 6, 3, 0] }
 ```
 
+### Gilbreath
+Deals off the top *n* cards of the deck then performs a riffle shuffle with the two decks.
+
+ ```rust
+let mut deck = Deck::from_iter(0..10);
+deck.gilbreath(5);
+// Deck{ [5, 6, 4, 7, 8, 3, 2, 9, 1, 0] }
+```
 
 ### Other Shuffles
 The inverse riffle shuffle and the original Premantle shuffle are available for statistical puroposes but do not represent any real-world shuffling technique. The faro is also provided as, althrough it is not a true shuffle, it is closely related to the riffle shuffle.
