@@ -44,11 +44,11 @@ deck.gilbreath(5);
 ```
 
 ### Overhand (Pemantle)
-The overhand method uses Pemantle’s algorithm to take packets of cards from the top and place them successively on the bottom.
+The overhand method uses Pemantle’s algorithm to take packets of cards from the top and place them successively on the bottom. The probability of a card being the end of the next packet is given by the argument *n*.
 
  ```rust
 let mut deck = Deck::from_iter(0..10);
-deck.overhand();
+deck.overhand(0.4);
 // Deck{ [9, 7, 8, 6, 3, 4, 5, 1, 2, 0] }
 ```
 
