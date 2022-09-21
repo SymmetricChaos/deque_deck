@@ -1,4 +1,4 @@
-use rand::seq::SliceRandom;
+use rand::{seq::SliceRandom, Rng};
 
 use crate::deck::Deck;
 
@@ -50,7 +50,7 @@ impl<T> Deck<T> {
 
             // If the right branch is chosen, place the card at the cursor position
             // and reduce the length of the right side
-            if self.bern(r / (l + r)) {
+            if self.rng.gen_bool(r / (l + r)) {
                 match right.draw_top() {
                     Some(card) => {
                         self.place_nth(cursor, card);
@@ -78,7 +78,7 @@ impl<T> Deck<T> {
             if ctr == self.len() {
                 break;
             }
-            if self.bern(0.5) {
+            if self.rng.gen_bool(0.5) {
                 let card = self
                     .draw_nth(cursor)
                     .expect("cursor should not be out of bounds");
@@ -109,7 +109,7 @@ impl<T> Deck<T> {
         let temp = self.cards.make_contiguous();
         let mut lo = 0;
         for i in 0..len {
-            if self.bern(p) {
+            if self.rng.gen_bool(p) {
                 temp[lo..i].reverse();
                 lo = i
             }
@@ -124,7 +124,7 @@ impl<T> Deck<T> {
         let temp = self.cards.make_contiguous();
         let mut lo = 0;
         for i in 0..len {
-            if self.bern(p) {
+            if self.rng.gen_bool(p) {
                 temp[lo..i].reverse();
                 lo = i
             }

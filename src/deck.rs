@@ -27,10 +27,6 @@ impl<T> Deck<T> {
         self.rng.gen_range(0..self.cards.len())
     }
 
-    pub(crate) fn bern(&mut self, p: f64) -> bool {
-        self.rng.gen_bool(p)
-    }
-
     /// Create an empty deck.
     pub fn empty() -> Deck<T> {
         Deck::from(VecDeque::new())
