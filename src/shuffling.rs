@@ -1,12 +1,6 @@
-use rand::{seq::SliceRandom, thread_rng};
-use rand_distr::{Bernoulli, Distribution};
+use rand::seq::SliceRandom;
 
 use crate::deck::Deck;
-
-fn bern(p: f64) -> bool {
-    let bern = Bernoulli::new(p).unwrap();
-    bern.sample(&mut rand::thread_rng())
-}
 
 impl<T> Deck<T> {
     /// Perform a Fisher-Yates shuffle on the deck. This is a mathematically correct shuffle that gives every card
@@ -56,7 +50,7 @@ impl<T> Deck<T> {
 
             // If the right branch is chosen, place the card at the cursor position
             // and reduce the length of the right side
-            if bern(r / (l + r)) {
+            if self.bern(r / (l + r)) {
                 match right.draw_top() {
                     Some(card) => {
                         self.place_nth(cursor, card);
@@ -84,7 +78,7 @@ impl<T> Deck<T> {
             if ctr == self.len() {
                 break;
             }
-            if bern(0.5) {
+            if self.bern(0.5) {
                 let card = self
                     .draw_nth(cursor)
                     .expect("cursor should not be out of bounds");
@@ -115,7 +109,7 @@ impl<T> Deck<T> {
         let temp = self.cards.make_contiguous();
         let mut lo = 0;
         for i in 0..len {
-            if bern(p) {
+            if self.bern(p) {
                 temp[lo..i].reverse();
                 lo = i
             }
@@ -130,7 +124,7 @@ impl<T> Deck<T> {
         let temp = self.cards.make_contiguous();
         let mut lo = 0;
         for i in 0..len {
-            if bern(p) {
+            if self.bern(p) {
                 temp[lo..i].reverse();
                 lo = i
             }
@@ -172,7 +166,7 @@ impl<T: Clone> Deck<T> {
             decks[ctr].place_top(self.draw_top().unwrap());
             ctr = (ctr + 1) % n;
         }
-        decks.shuffle(&mut thread_rng());
+        decks.shuffle(&mut self.rng);
         *self = Deck::from(decks);
     }
 }

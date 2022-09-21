@@ -1,16 +1,16 @@
+use rand::{Rng, SeedableRng};
+use rand_distr::{Binomial, Distribution};
+use rand_xoshiro::Xoroshiro128PlusPlus;
 use std::{
     collections::VecDeque,
     fmt::{Debug, Display},
 };
 
-use rand::Rng;
-use rand_distr::{Binomial, Distribution};
-
-#[derive(Debug, Clone, PartialEq, Default)]
-/// A Deck is just a thin wrapper around a VecDeque with a variety of convenient methods provided. If insufficient
-/// control of the cards is available through the Deck interface the VecDeque itself is accessible.
+#[derive(Debug, Clone, PartialEq)]
+/// A deque_deck Deck is simply a VecDeque and an RNG
 pub struct Deck<T> {
     pub cards: VecDeque<T>,
+    pub(crate) rng: Xoroshiro128PlusPlus,
 }
 
 impl<T> Deck<T> {
@@ -18,13 +18,17 @@ impl<T> Deck<T> {
     // are much more biased than a binomial distribution. However for a 52 card deck there is a 99.98%
     // probability of selecting in the middle half and a 93% chance of selecting in the middle quarter of
     // the deck.
-    pub(crate) fn binom(&self) -> usize {
+    pub(crate) fn binom(&mut self) -> usize {
         let bin = Binomial::new(self.cards.len().try_into().unwrap(), 0.5).unwrap();
-        usize::try_from(bin.sample(&mut rand::thread_rng())).unwrap()
+        usize::try_from(bin.sample(&mut self.rng)).unwrap()
     }
 
-    pub(crate) fn uniform(&self) -> usize {
-        rand::thread_rng().gen_range(0..self.cards.len())
+    pub(crate) fn uniform(&mut self) -> usize {
+        self.rng.gen_range(0..self.cards.len())
+    }
+
+    pub(crate) fn bern(&mut self, p: f64) -> bool {
+        self.rng.gen_bool(p)
     }
 
     /// Create an empty deck.
@@ -36,6 +40,21 @@ impl<T> Deck<T> {
     pub fn with_capacity(n: usize) -> Deck<T> {
         Deck::from(VecDeque::with_capacity(n))
     }
+
+    /// Supply 128 bits of state for the RNG
+    pub fn set_seed(&mut self, seed: [u8; 16]) {
+        self.rng = Xoroshiro128PlusPlus::from_seed(seed)
+    }
+
+    /// Seed the internal RNG from a u64.
+    pub fn set_seed_u64(&mut self, seed: u64) {
+        self.rng = Xoroshiro128PlusPlus::seed_from_u64(seed)
+    }
+
+    // /// Jump the internal RNG forward by 2^64 steps.
+    // pub fn jump(&mut self) {
+    //     self.rng.jump()
+    // }
 
     /// Number of cards in the Deck.
     pub fn len(&self) -> usize {
@@ -123,12 +142,14 @@ impl<T> Deck<T> {
 
     /// Draw a uniformly random card from the deck.
     pub fn draw_random(&mut self) -> Option<T> {
-        self.draw_nth(self.uniform())
+        let n = self.uniform();
+        self.draw_nth(n)
     }
 
     /// Draw a card from the deck following a binomial distribution.
     pub fn draw_binom(&mut self) -> Option<T> {
-        self.draw_nth(self.binom())
+        let n = self.binom();
+        self.draw_nth(n)
     }
 
     /// Place the card on top of the deck.
@@ -148,12 +169,14 @@ impl<T> Deck<T> {
 
     /// Place the card at a random position in the deck.
     pub fn place_random(&mut self, card: T) {
-        self.place_nth(self.uniform(), card)
+        let n = self.uniform();
+        self.place_nth(n, card)
     }
 
     /// Place a card into the deck following a binomial distribution.
     pub fn place_binom(&mut self, card: T) {
-        self.place_nth(self.binom(), card)
+        let n = self.binom();
+        self.place_nth(n, card)
     }
 
     /// Cut the deck at nth position.
@@ -163,12 +186,14 @@ impl<T> Deck<T> {
 
     /// Cut the deck at a random position.
     pub fn cut_random(&mut self) {
-        self.cards.rotate_left(self.uniform())
+        let n = self.uniform();
+        self.cards.rotate_left(n)
     }
 
     /// Cut the deck following a binomial distribution.
     pub fn cut_binom(&mut self) {
-        self.cards.rotate_left(self.binom())
+        let n = self.binom();
+        self.cards.rotate_left(n)
     }
 
     /// Split the deck at the nth position, retaining the top part.
@@ -178,12 +203,14 @@ impl<T> Deck<T> {
 
     /// Split the deck at a random position, retaining the top part.
     pub fn split_off_random(&mut self) -> Deck<T> {
-        self.split_off_nth(self.uniform())
+        let n = self.uniform();
+        self.split_off_nth(n)
     }
 
     /// Split the deck following a binomial distribution, retaining the top part.
     pub fn split_off_binom(&mut self) -> Deck<T> {
-        self.split_off_nth(self.binom())
+        let n = self.binom();
+        self.split_off_nth(n)
     }
 
     /// Split the deck at the nth position, consuming it.
@@ -193,13 +220,13 @@ impl<T> Deck<T> {
     }
 
     /// Split the deck at a random position, consuming it.
-    pub fn split_random(self) -> (Deck<T>, Deck<T>) {
+    pub fn split_random(mut self) -> (Deck<T>, Deck<T>) {
         let n = self.uniform();
         self.split_nth(n)
     }
 
     /// Split the deck following a binomial distribution, consuming it.
-    pub fn split_binom(self) -> (Deck<T>, Deck<T>) {
+    pub fn split_binom(mut self) -> (Deck<T>, Deck<T>) {
         let n = self.binom();
         self.split_nth(n)
     }
@@ -240,6 +267,7 @@ impl<T, const N: usize> From<[T; N]> for Deck<T> {
     fn from(arr: [T; N]) -> Self {
         Deck {
             cards: VecDeque::from(arr),
+            rng: Xoroshiro128PlusPlus::from_entropy(),
         }
     }
 }
@@ -248,6 +276,7 @@ impl<T> From<Vec<T>> for Deck<T> {
     fn from(vec: Vec<T>) -> Self {
         Deck {
             cards: VecDeque::from(vec),
+            rng: Xoroshiro128PlusPlus::from_entropy(),
         }
     }
 }
@@ -256,6 +285,7 @@ impl<T> From<VecDeque<T>> for Deck<T> {
     fn from(vec: VecDeque<T>) -> Self {
         Deck {
             cards: VecDeque::from(vec),
+            rng: Xoroshiro128PlusPlus::from_entropy(),
         }
     }
 }
@@ -266,7 +296,10 @@ impl<T> FromIterator<T> for Deck<T> {
         let (lower, _) = iterator.size_hint();
         let mut cards = VecDeque::with_capacity(lower);
         cards.extend(iterator);
-        Deck { cards }
+        Deck {
+            cards,
+            rng: Xoroshiro128PlusPlus::from_entropy(),
+        }
     }
 }
 
