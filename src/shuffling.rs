@@ -118,7 +118,7 @@ impl<T> Deck<T> {
     }
 
     /// Premantle's original algorithm. This has similar statistical properties to an overhand shuffle
-    /// but does not recreate the shuffle itself. Runs about twice as fast.
+    /// but does not recreate the shuffle itself. Runs in about 2/3 the time.
     pub fn premantle(&mut self, p: f64) {
         let len = self.len();
         let temp = self.cards.make_contiguous();
