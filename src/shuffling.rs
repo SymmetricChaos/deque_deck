@@ -152,7 +152,7 @@ impl<T> Deck<T> {
 }
 
 impl<T: Clone> Deck<T> {
-    /// Perform a pile shuffle using n piles. Very poor randomization.
+    /// Perform a pile shuffle using n piles. Very poor randomization and quite slow.
     pub fn pile_shuffle(&mut self, n: usize) {
         // If n is greather than or equal to the size of the deck
         // it is equivalent to a Fisher-Yates shuffle

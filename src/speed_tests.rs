@@ -2,11 +2,13 @@
 mod test_deck {
     use crate::deck::Deck;
 
-    const NUM_TRIALS: usize = 10_000;
     const NUM_CARDS: usize = 52;
+    const NUM_TRIALS: usize = 50_000;
 
     #[test]
     fn shuffle_speed() {
+        println!("Suffle a deck of {} cards {} times.", NUM_CARDS, NUM_TRIALS);
+
         let mut deck = Deck::from_iter(0..NUM_CARDS);
         let time = std::time::SystemTime::now();
         for _ in 0..NUM_TRIALS {
