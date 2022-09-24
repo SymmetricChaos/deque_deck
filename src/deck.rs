@@ -1,6 +1,6 @@
 use rand::{Rng, SeedableRng};
 use rand_distr::{Binomial, Distribution};
-use rand_xoshiro::Xoroshiro128PlusPlus;
+use rand_xoshiro::Xoshiro256PlusPlus;
 use std::{
     collections::VecDeque,
     fmt::{Debug, Display},
@@ -10,7 +10,7 @@ use std::{
 /// A deque_deck Deck is simply a VecDeque and an RNG
 pub struct Deck<T> {
     pub cards: VecDeque<T>,
-    pub(crate) rng: Xoroshiro128PlusPlus,
+    pub(crate) rng: Xoshiro256PlusPlus,
 }
 
 impl<T> Deck<T> {
@@ -37,14 +37,14 @@ impl<T> Deck<T> {
         Deck::from(VecDeque::with_capacity(n))
     }
 
-    /// Supply 128 bits of state for the RNG
-    pub fn set_seed(&mut self, seed: [u8; 16]) {
-        self.rng = Xoroshiro128PlusPlus::from_seed(seed)
+    /// Supply 256 bits of state for the RNG
+    pub fn set_seed(&mut self, seed: [u8; 32]) {
+        self.rng = Xoshiro256PlusPlus::from_seed(seed)
     }
 
     /// Seed the internal RNG from a u64.
     pub fn set_seed_u64(&mut self, seed: u64) {
-        self.rng = Xoroshiro128PlusPlus::seed_from_u64(seed)
+        self.rng = Xoshiro256PlusPlus::seed_from_u64(seed)
     }
 
     // /// Jump the internal RNG forward by 2^64 steps.
@@ -263,7 +263,7 @@ impl<T, const N: usize> From<[T; N]> for Deck<T> {
     fn from(arr: [T; N]) -> Self {
         Deck {
             cards: VecDeque::from(arr),
-            rng: Xoroshiro128PlusPlus::from_entropy(),
+            rng: Xoshiro256PlusPlus::from_entropy(),
         }
     }
 }
@@ -272,7 +272,7 @@ impl<T> From<Vec<T>> for Deck<T> {
     fn from(vec: Vec<T>) -> Self {
         Deck {
             cards: VecDeque::from(vec),
-            rng: Xoroshiro128PlusPlus::from_entropy(),
+            rng: Xoshiro256PlusPlus::from_entropy(),
         }
     }
 }
@@ -281,7 +281,7 @@ impl<T> From<VecDeque<T>> for Deck<T> {
     fn from(vec: VecDeque<T>) -> Self {
         Deck {
             cards: VecDeque::from(vec),
-            rng: Xoroshiro128PlusPlus::from_entropy(),
+            rng: Xoshiro256PlusPlus::from_entropy(),
         }
     }
 }
@@ -294,7 +294,7 @@ impl<T> FromIterator<T> for Deck<T> {
         cards.extend(iterator);
         Deck {
             cards,
-            rng: Xoroshiro128PlusPlus::from_entropy(),
+            rng: Xoshiro256PlusPlus::from_entropy(),
         }
     }
 }
