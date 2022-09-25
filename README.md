@@ -14,7 +14,7 @@ deque_deck = "0.1.1"
 Standard manipulations of a deque data structure are available but for convenience have been renamed to reflect the language used for decks of cards. So "draw" is used in place of "pop" and "cut" is used in place of "left_rotate" and so on. 
 
 ## Shuffling
-Various shuffling algorithms are supported. If quality of randomization is needed only the shuffle() methods should be used. All other methods exist either to simulate physical methods of shuffling or are just of interest mathematically.
+Various shuffling algorithms are supported. If quality of randomization is needed only the shuffle() methods should be used. All other methods exist either to simulate physical methods of shuffling or are just of interest mathematically. To achieve randomization simulated shuffles need to be called several times.
 
 ### Standard (Fisher-Yates)
 The default shuffling method uses the Fisher-Yates algorithm which gives every card an equal probabilty of ending up at any position.
