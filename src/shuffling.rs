@@ -145,7 +145,11 @@ impl<T> Deck<T> {
         };
 
         for card in right {
-            self.place_nth(cursor, card);
+            if cursor >= self.len() {
+                self.place_bottom(card);
+            } else {
+                self.place_nth(cursor, card);
+            }
             cursor += 2;
         }
     }
@@ -180,7 +184,7 @@ mod test_deck {
         let mut deck = Deck::<i32>::from_iter(0..10);
         deck.set_seed_u64(314159);
         deck.riffle();
-        assert_eq!(deck.cards, [5, 0, 1, 6, 2, 3, 7, 8, 4, 9]);
+        assert_eq!(deck.cards, [0, 7, 1, 2, 3, 8, 4, 5, 9, 6]);
     }
 
     #[test]
@@ -191,7 +195,7 @@ mod test_deck {
         left.riffle_with(right);
         assert_eq!(
             left.cards,
-            [10, 11, 0, 1, 12, 2, 3, 13, 4, 5, 14, 15, 16, 17, 18, 6, 7, 8, 19, 9]
+            [0, 1, 10, 11, 12, 2, 13, 3, 14, 15, 4, 16, 17, 5, 18, 6, 7, 8, 9, 19]
         );
     }
 
@@ -200,56 +204,60 @@ mod test_deck {
         let mut deck = Deck::from_iter(0..10_i32);
         deck.set_seed_u64(314159);
         deck.gilbreath(5).unwrap();
-        assert_eq!(deck.cards, [5, 6, 4, 3, 7, 2, 1, 8, 0, 9]);
+        assert_eq!(deck.cards, [4, 3, 5, 6, 7, 2, 8, 1, 9, 0]);
     }
 
     #[test]
     fn overhand() {
         let mut deck = Deck::from_iter(0..10_i32);
         deck.set_seed_u64(314159);
-        deck.overhand(0.3);
-        assert_eq!(deck.cards, [9, 8, 7, 4, 5, 6, 1, 2, 3, 0]);
+        deck.overhand(0.5);
+        assert_eq!(deck.cards, [9, 8, 6, 7, 4, 5, 3, 2, 0, 1]);
     }
 
     #[test]
     fn premantle() {
-        let mut deck = Deck::from_iter(0..10_i32);
+        let mut deck = Deck::from_iter(0..10);
         deck.set_seed_u64(314159);
-        deck.premantle(0.3);
-        assert_eq!(deck.cards, [0, 3, 2, 1, 6, 5, 4, 7, 8, 9]);
+        deck.premantle(0.5);
+        assert_eq!(deck.cards, [1, 0, 2, 3, 5, 4, 7, 6, 8, 9]);
     }
 
     #[test]
     fn inv_riffle() {
-        let mut deck = Deck::from_iter(0..10_i32);
+        let mut deck = Deck::from_iter(0..10);
         deck.set_seed_u64(314159);
         deck.inverse_riffle();
-        assert_eq!(deck.cards, [2, 3, 5, 6, 8, 9, 0, 1, 4, 7]);
+        assert_eq!(deck.cards, [0, 1, 5, 7, 2, 3, 4, 6, 8, 9]);
     }
 
     #[test]
-    fn faro_in_place() {
+    fn faro() {
         // Out shuffle places the first card on top
-        let mut deck = Deck::from_iter(0..10_i32);
+        let mut deck = Deck::from_iter(0..10);
         deck.faro(true);
-        assert_eq!(deck, Deck::from([0, 5, 1, 6, 2, 7, 3, 8, 4, 9]));
+        assert_eq!(deck.cards, [0, 5, 1, 6, 2, 7, 3, 8, 4, 9]);
 
         // In shuffle places the first card in the second position
-        let mut deck = Deck::from_iter(0..10_i32);
+        deck.sort();
         deck.faro(false);
-        assert_eq!(deck, Deck::from([5, 0, 6, 1, 7, 2, 8, 3, 9, 4]));
+        assert_eq!(deck.cards, [5, 0, 6, 1, 7, 2, 8, 3, 9, 4]);
 
         // Check an odd number of cards
-        let mut deck = Deck::from_iter(0..10_i32);
+        let mut deck = Deck::from_iter(0..9);
+        deck.faro(true);
+        assert_eq!(deck.cards, [0, 4, 1, 5, 2, 6, 3, 7, 8]);
+
+        deck.sort();
         deck.faro(false);
-        assert_eq!(deck, Deck::from([4, 0, 5, 1, 6, 2, 7, 3, 8]));
+        assert_eq!(deck.cards, [4, 0, 5, 1, 6, 2, 7, 3, 8]);
     }
 
     #[test]
     fn pile_shuffle() {
-        let mut deck = Deck::from_iter(0..10_i32);
+        let mut deck = Deck::from_iter(0..10);
         deck.set_seed_u64(314159);
         deck.pile_shuffle(3);
-        assert_eq!(deck.cards, [8, 5, 2, 7, 4, 1, 9, 6, 3, 0]);
+        assert_eq!(deck.cards, [9, 6, 3, 0, 7, 4, 1, 8, 5, 2]);
     }
 }

@@ -42,15 +42,15 @@ impl<T> Deck<T> {
         self.rng = Xoshiro256PlusPlus::from_seed(seed)
     }
 
-    /// Seed the internal RNG from a u64.
+    /// Seed the internal RNG from a u64. Should be used only for testing.
     pub fn set_seed_u64(&mut self, seed: u64) {
         self.rng = Xoshiro256PlusPlus::seed_from_u64(seed)
     }
 
-    // /// Jump the internal RNG forward by 2^64 steps.
-    // pub fn jump(&mut self) {
-    //     self.rng.jump()
-    // }
+    /// Jump the internal RNG forward by 2^128 steps.
+    pub fn jump(&mut self) {
+        self.rng.jump()
+    }
 
     /// Number of cards in the Deck.
     pub fn len(&self) -> usize {
@@ -158,7 +158,7 @@ impl<T> Deck<T> {
         self.cards.push_back(card)
     }
 
-    /// Place the card in the nth position in the deck. 0 places it on the top.
+    /// Place the card in the nth position in the deck. 0 places it on the top. Panics if n is an invalid index.
     pub fn place_nth(&mut self, n: usize, card: T) {
         self.cards.insert(n, card);
     }
@@ -166,13 +166,13 @@ impl<T> Deck<T> {
     /// Place the card at a random position in the deck.
     pub fn place_random(&mut self, card: T) {
         let n = self.uniform();
-        self.place_nth(n, card)
+        self.place_nth(n, card);
     }
 
     /// Place a card into the deck following a binomial distribution.
     pub fn place_binom(&mut self, card: T) {
         let n = self.binom();
-        self.place_nth(n, card)
+        self.place_nth(n, card);
     }
 
     /// Cut the deck at nth position.
@@ -379,20 +379,20 @@ mod test_deck {
     fn cut_nth() {
         let mut deck = Deck::from([1, 2, 3, 4, 5, 6]);
         deck.cut_nth(3);
-        assert_eq!(deck, Deck::from([4, 5, 6, 1, 2, 3]));
+        assert_eq!(deck.cards, [4, 5, 6, 1, 2, 3]);
     }
 
     #[test]
     fn cycle() {
         let mut deck = Deck::from([0, 1, 2]);
         deck.cycle(&[0, 1, 2]).unwrap();
-        assert_eq!(deck, Deck::from([1, 2, 0]));
+        assert_eq!(deck.cards, [1, 2, 0]);
     }
 
     #[test]
     fn reverse() {
         let mut deck = Deck::from_iter(0..=9);
         deck.reverse();
-        assert_eq!(deck, Deck::from([9, 8, 7, 6, 5, 4, 3, 2, 1, 0]));
+        assert_eq!(deck.cards, [9, 8, 7, 6, 5, 4, 3, 2, 1, 0]);
     }
 }

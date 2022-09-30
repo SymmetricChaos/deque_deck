@@ -28,7 +28,7 @@ deck.shuffle();
 ### Riffle (Gibert-Shannon-Reeds)
 The riffle method uses the Gibert-Shannon-Reeds algorithm to pick a point near the middle of the deck (using a binomial distribution), then split the deck and riffle the two halves together.
 
- ```rust
+```rust
 let mut deck = Deck::<i32>::from_iter(0..10);
 deck.riffle();
 // Deck{ [5, 6, 0, 7, 1, 8, 2, 3, 4, 9] }
@@ -37,7 +37,7 @@ deck.riffle();
 ### Overhand (Pemantle)
 The overhand method uses Pemantle’s algorithm to take packets of cards from the top and place them successively on the bottom. The probability of a card being the end of the next packet is given by the argument *n*.
 
- ```rust
+```rust
 let mut deck = Deck::<i32>::from_iter(0..10);
 deck.overhand(0.4);
 // Deck{ [9, 7, 8, 6, 3, 4, 5, 1, 2, 0] }
@@ -46,7 +46,7 @@ deck.overhand(0.4);
 ### Pile Shuffle
 Deals out the cards on the deck into *n* piles amd then stacks those piles in a random order. Although popular this provides extremely poor randomization.
 
- ```rust
+```rust
 let mut deck = Deck::<i32>::from_iter(0..10);
 deck.pile_shuffe(3);
 // Deck{ [8, 5, 2, 7, 4, 1, 9, 6, 3, 0] }
@@ -55,7 +55,7 @@ deck.pile_shuffe(3);
 ### Gilbreath
 Deals off the top *n* cards of the deck then performs a riffle shuffle with the two decks.
 
- ```rust
+```rust
 let mut deck = Deck::<i32>::from_iter(0..10);
 deck.gilbreath(5);
 // Deck{ [5, 6, 4, 7, 8, 3, 2, 9, 1, 0] }

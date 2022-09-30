@@ -1,0 +1,5 @@
+Fisher-Yates: 26.7815ms
+Riffle: 66.6591ms
+Overhand: 13.2562ms
+Premantle: 12.8183ms
+Pile Shuffle: 111.7009ms
