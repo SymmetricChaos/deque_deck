@@ -4,7 +4,8 @@ use crate::deck::Deck;
 
 impl<T> Deck<T> {
     /// Perform a Fisher-Yates shuffle on the deck. This is a mathematically correct shuffle that gives every card
-    /// an equal chance of ending up at any postion. It should be perferred whenever thorough shuffling is needed.
+    /// an equal chance of ending up at any postion. It should be perferred whenever thorough shuffling is needed. Also
+    /// the fastest method provided.
     pub fn shuffle(&mut self) {
         let mut rng = rand::thread_rng();
         self.cards.make_contiguous().shuffle(&mut rng);
@@ -118,7 +119,7 @@ impl<T> Deck<T> {
     }
 
     /// Premantle's original algorithm. This has similar statistical properties to an overhand shuffle
-    /// but does not recreate the shuffle itself. Runs in about 2/3 the time.
+    /// but does not recreate the shuffle itself. Nearly identical running time to overhand.
     pub fn premantle(&mut self, p: f64) {
         let len = self.len();
         let temp = self.cards.make_contiguous();
@@ -156,7 +157,7 @@ impl<T> Deck<T> {
 }
 
 impl<T: Clone> Deck<T> {
-    /// Perform a pile shuffle using n piles. Very poor randomization and slower than all other simulated shuffles.
+    /// Perform a pile shuffle using n piles. Poorest randomization and slowest to execute.
     pub fn pile_shuffle(&mut self, n: usize) {
         // If n is greather than or equal to the size of the deck
         // it is equivalent to a Fisher-Yates shuffle
