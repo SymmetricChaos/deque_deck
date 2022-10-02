@@ -11,7 +11,7 @@ mod test_deck {
     fn shuffle_speed() {
         // Speed tests write to file so we can see result with release mode
         // The outputs.txt file is used to save information and ensure nothing is optimized away by the compiler
-        let mut f = File::create("speed.txt").unwrap();
+        let mut f = File::create(format!("speed_{}x{}.txt", NUM_CARDS, NUM_TRIALS)).unwrap();
         let mut o = File::create("outputs.txt").unwrap();
 
         writeln!(
@@ -69,7 +69,17 @@ mod test_deck {
             firsts.push(deck.top().unwrap().clone())
         }
         let elapsed = time.elapsed().unwrap();
-        writeln!(f, "Pile: {:?}", elapsed).unwrap();
+        writeln!(f, "5 Piles: {:?}", elapsed).unwrap();
+        writeln!(o, "{:?}", firsts).unwrap();
+
+        firsts.clear();
+        let time = std::time::SystemTime::now();
+        for _ in 0..NUM_TRIALS {
+            deck.pile_shuffle(10);
+            firsts.push(deck.top().unwrap().clone())
+        }
+        let elapsed = time.elapsed().unwrap();
+        writeln!(f, "10 Piles: {:?}", elapsed).unwrap();
         writeln!(o, "{:?}", firsts).unwrap();
     }
 }

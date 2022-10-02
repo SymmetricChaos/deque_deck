@@ -1,0 +1,7 @@
+Shuffle a deck of 100 cards 50000 times.
+Fisher-Yates: 65.0455ms
+Riffle: 148.3274ms
+Overhand: 24.3076ms
+Premantle: 23.8395ms
+5 Piles: 154.1741ms
+10 Piles: 244.8866ms
